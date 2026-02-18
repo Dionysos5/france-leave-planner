@@ -1,0 +1,20 @@
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: #fcfcfc;
+  background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
+  background-size: 32px 32px;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+.day-cell {
+  aspect-ratio: 1 / 1;
+}
+
+.settings-slideover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-slideover.closed {
+  transform: translateX(100%);
+}
