@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme {
+  --color-muted: #64748b;
+  --color-leave-cp: #3b82f6;
+  --color-leave-cp-hover: #2563eb;
+  --color-leave-rtt: #a855f7;
+  --color-leave-rtt-hover: #9333ea;
+  --color-leave-unpaid: #f97316;
+  --color-leave-unpaid-hover: #ea580c;
+}
+
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: #fcfcfc;
+  background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
+  background-size: 32px 32px;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.day-cell {
+  aspect-ratio: 1 / 1;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.slideover-overlay[data-state="open"] {
+  animation: overlay-in 0.2s ease both;
+}
+
+.slideover-overlay[data-state="closed"] {
+  animation: overlay-out 0.2s ease both;
+}
+
+@keyframes slideover-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideover-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.slideover[data-state="open"] {
+  animation: slideover-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.slideover[data-state="closed"] {
+  animation: slideover-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-enter-up {
+  animation: enter-up 0.5s ease both;
+}
