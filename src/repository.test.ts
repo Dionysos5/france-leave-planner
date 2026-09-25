@@ -79,6 +79,23 @@ describe('createRepository', () => {
     ]);
   });
 
+  test('saved plan survives a load round-trip', () => {
+    const captured: { value: string | null } = { value: null };
+    const storage = {
+      getItem: () => captured.value,
+      setItem: (_key: string, value: string) => {
+        captured.value = value;
+      },
+    };
+    const repository = createRepository(storage);
+    repository.save({
+      plan: { '2026-07-14': 'CP', '2026-07-15': 'RTT' },
+      settings: DEFAULT_SETTINGS,
+      uiPreferences: DEFAULT_UI_PREFS,
+    });
+    expect(repository.load().plan).toEqual({ '2026-07-14': 'CP', '2026-07-15': 'RTT' });
+  });
+
   test('malformed JSON yields defaults', () => {
     expect(createRepository(storageWith('{not json')).load()).toEqual({
       plan: {},

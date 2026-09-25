@@ -147,9 +147,9 @@ const sanitizeState = (value: unknown): PersistedState => {
   if (!value || typeof value !== 'object') {
     return EMPTY_STATE;
   }
-  const state = value as Partial<PersistedState>;
+  const state = value as { leaves?: unknown; settings?: unknown; uiPreferences?: unknown };
   return {
-    plan: sanitizePlan(state.plan),
+    plan: sanitizePlan(state.leaves),
     settings: sanitizeSettings(state.settings),
     uiPreferences: sanitizeUiPreferences(state.uiPreferences),
   };
