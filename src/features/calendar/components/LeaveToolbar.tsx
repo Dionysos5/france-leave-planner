@@ -63,6 +63,9 @@ const LeaveToolbar = ({ activeTool, setActiveTool }: LeaveToolbarProps) => {
         >
           {swatch}
           <span className={active ? undefined : 'hidden sm:inline'}>{shortLabel}</span>
+          <span aria-hidden className="hidden md:inline text-[10px] tabular-nums opacity-50">
+            {displayKeyForTool(tool)}
+          </span>
         </Button>
       </Tooltip>
     );
