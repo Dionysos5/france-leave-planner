@@ -1,9 +1,21 @@
 import { Tooltip } from '@components/ui/Tooltip';
 import { DAY_TYPES } from '@constants';
-import type { DayType, Plan } from '@core';
-import { formatDate, getDayInfo, getMonthDays, isToday, type YearCalendar } from '@core';
+import type { DayType, Half, Plan } from '@core';
+import { formatDate, getDayInfo, getMonthDays, halvesOf, isToday, type YearCalendar } from '@core';
 import { useTranslation } from '@i18n/LocaleContext';
 import type { PointerEvent } from 'react';
+
+/** One half of a split day: the morning is the top-left triangle, the afternoon the bottom-right. */
+const HalfFill = ({ type, half }: { type: DayType; half: Half }) => {
+  const { halfClass, icon: Icon } = DAY_TYPES[type];
+  const corner = half === 'am' ? 'top-0.5 left-0.5' : 'bottom-0.5 right-0.5';
+  return (
+    // -inset-px covers the cell border, as full days do; a free half keeps it.
+    <span aria-hidden className={`absolute -inset-px rounded-sm half-${half} ${halfClass}`}>
+      {Icon && <Icon size={11} className={`absolute opacity-80 ${corner}`} />}
+    </span>
+  );
+};
 
 interface MonthGridProps {
   calendar: YearCalendar;
@@ -49,12 +61,13 @@ const MonthGrid = ({
     const info = getDayInfo(calendar, dateStr);
     const isWknd = info.kind === 'weekend';
     const holiday = info.holiday;
-    // Split days are drawn in a later change; until then only full days show.
-    const entry = plan[dateStr];
-    const dayType = typeof entry === 'string' ? entry : undefined;
+    const { am, pm } = halvesOf(plan[dateStr]);
+    const dayType = am === pm ? am : null;
     const today = isToday(dateStr);
 
     const previewing = selection.has(dateStr) && !isWknd && !holiday;
+    // A drag preview paints full days, so it hides the split.
+    const split = am !== pm && !previewing;
     const shownType = previewing ? activeTool : dayType;
     const DayIcon = shownType ? DAY_TYPES[shownType].icon : undefined;
 
@@ -68,6 +81,11 @@ const MonthGrid = ({
       bgClass = DAY_TYPES[dayType].cellClass;
       textClass = 'font-bold';
       borderClass = '';
+    } else if (split) {
+      // The halves are drawn as triangles below; the number sits on a white chip over both.
+      bgClass = 'bg-white hover:brightness-95';
+      textClass = 'font-bold text-slate-900';
+      borderClass = 'border-slate-200';
     } else if (holiday) {
       bgClass = 'bg-[#fff1f2]';
       textClass = 'text-[#be123c] font-bold';
@@ -108,7 +126,11 @@ const MonthGrid = ({
           ${bgClass} ${textClass} ${cursorClass} ${borderClass}
         `}
       >
-        <span>{d}</span>
+        {split && am && <HalfFill type={am} half="am" />}
+        {split && pm && <HalfFill type={pm} half="pm" />}
+        <span className={split ? 'relative rounded-sm bg-white/90 px-1 leading-tight' : undefined}>
+          {d}
+        </span>
         {DayIcon && (
           <DayIcon size={11} aria-hidden className="absolute bottom-0.5 right-0.5 opacity-80" />
         )}

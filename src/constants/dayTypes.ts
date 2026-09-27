@@ -15,6 +15,8 @@ interface DayTypeDescriptor {
   activeClass: string;
   /** Small square on the toolbar button showing the day's color. */
   swatchClass: string;
+  /** Fill for one half of a split day (a triangle of the cell). */
+  halfClass: string;
   /** Drawn on painted days and inside the swatch. */
   icon?: LucideIcon;
 }
@@ -28,6 +30,7 @@ export const DAY_TYPES: Record<DayType, DayTypeDescriptor> = {
     cellClass: 'bg-leave-cp text-white border-transparent hover:bg-leave-cp-hover',
     activeClass: 'bg-leave-cp text-white hover:bg-leave-cp-hover',
     swatchClass: 'bg-leave-cp',
+    halfClass: 'bg-leave-cp',
   },
   [DayType.RTT]: {
     shortcut: '2',
@@ -36,6 +39,7 @@ export const DAY_TYPES: Record<DayType, DayTypeDescriptor> = {
     cellClass: 'bg-leave-rtt text-white border-transparent hover:bg-leave-rtt-hover',
     activeClass: 'bg-leave-rtt text-white hover:bg-leave-rtt-hover',
     swatchClass: 'bg-leave-rtt',
+    halfClass: 'bg-leave-rtt',
   },
   [DayType.UNPAID]: {
     shortcut: '3',
@@ -44,6 +48,7 @@ export const DAY_TYPES: Record<DayType, DayTypeDescriptor> = {
     cellClass: 'bg-leave-unpaid text-white border-transparent hover:bg-leave-unpaid-hover',
     activeClass: 'bg-leave-unpaid text-white hover:bg-leave-unpaid-hover',
     swatchClass: 'bg-leave-unpaid',
+    halfClass: 'bg-leave-unpaid',
   },
   [DayType.SICK]: {
     shortcut: '4',
@@ -52,6 +57,7 @@ export const DAY_TYPES: Record<DayType, DayTypeDescriptor> = {
     cellClass: 'bg-leave-sick text-white border-transparent hover:bg-leave-sick-hover',
     activeClass: 'bg-leave-sick text-white hover:bg-leave-sick-hover',
     swatchClass: 'bg-leave-sick',
+    halfClass: 'bg-leave-sick',
   },
   // A worked day: marked on the calendar, ignored by the balances.
   [DayType.WFH]: {
@@ -62,6 +68,7 @@ export const DAY_TYPES: Record<DayType, DayTypeDescriptor> = {
     activeClass:
       'bg-wfh-tint text-wfh-ink ring-1 ring-inset ring-wfh-border hover:bg-wfh-tint-hover',
     swatchClass: 'bg-wfh-tint text-wfh-ink ring-1 ring-inset ring-wfh-border',
+    halfClass: 'bg-wfh-tint text-wfh-ink',
     icon: House,
   },
 };

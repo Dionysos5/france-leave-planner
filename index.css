@@ -57,6 +57,14 @@ body {
   -webkit-touch-callout: none;
 }
 
+/* Split days: the diagonal runs from the top-right to the bottom-left corner. */
+.half-am {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.half-pm {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
 /* Phones: one month per row, so square cells would make each month a full screen. */
 @media (max-width: 639px) {
   .day-cell {
