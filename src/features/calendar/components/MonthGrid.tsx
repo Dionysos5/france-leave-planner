@@ -97,7 +97,7 @@ const MonthGrid = ({
         onPointerDown={handlePointerDown}
         onContextMenu={(e) => e.preventDefault()}
         className={`
-          day-cell flex flex-col items-center justify-center text-xs border rounded-sm transition-all duration-75 relative select-none
+          day-cell flex flex-col items-center justify-center text-sm sm:text-xs border rounded-sm transition-all duration-75 relative select-none
           ${bgClass} ${textClass} ${cursorClass} ${borderClass}
         `}
       >
@@ -120,8 +120,8 @@ const MonthGrid = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5">
-      <div className="flex justify-between items-center mb-5">
+    <div className="bg-white rounded-lg border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-3 sm:p-5">
+      <div className="flex justify-between items-center mb-3 sm:mb-5">
         <h2 className="text-xs font-extrabold text-slate-800 uppercase tracking-widest">
           {capitalizedMonth}
         </h2>

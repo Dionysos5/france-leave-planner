@@ -14,10 +14,12 @@ const BalanceCard = ({ label, value, warning, ...rest }: BalanceCardProps) => (
     {...rest}
     className="relative bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm overflow-hidden"
   >
-    <div className="flex items-center gap-2">
-      <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{label}</span>
+    <div className="flex items-center justify-between gap-2">
+      <span className="min-w-0 text-[9px] font-bold text-muted uppercase tracking-widest">
+        {label}
+      </span>
       <span
-        className={`text-xs font-extrabold tabular-nums ${value < 0 ? 'text-red-500' : 'text-slate-800'}`}
+        className={`shrink-0 text-xs font-extrabold tabular-nums ${value < 0 ? 'text-red-500' : 'text-slate-800'}`}
       >
         {value.toFixed(1)}
       </span>

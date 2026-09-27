@@ -26,6 +26,8 @@ Built for one profile: a **cadre au forfait jours (218 days) under the Syntec ag
 
 Shortcuts use physical key positions, so they work on AZERTY keyboards without Shift.
 
+On a touch screen, tap a day to paint it, or long-press and drag to paint a range.
+
 ## Development
 
 ```bash

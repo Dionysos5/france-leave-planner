@@ -24,7 +24,7 @@ export const Button = ({
   return (
     <button
       type={type}
-      className={`rounded-md px-3.5 py-2 text-xs font-bold flex items-center gap-2 whitespace-nowrap ${FOCUS_CLASSES} ${VARIANT_CLASSES[variant]} ${className}`}
+      className={`rounded-md px-2.5 sm:px-3.5 py-2 text-xs font-bold flex items-center gap-2 whitespace-nowrap ${FOCUS_CLASSES} ${VARIANT_CLASSES[variant]} ${className}`}
       {...props}
     />
   );

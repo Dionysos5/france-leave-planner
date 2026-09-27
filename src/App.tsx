@@ -34,10 +34,10 @@ function App() {
 
   return (
     <div className="min-h-screen pb-28">
-      <header className="px-6 pt-8 pb-4 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between">
+      <header className="px-4 pt-4 pb-2 md:px-6 md:pt-8 md:pb-4 max-w-7xl mx-auto">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="" className="w-20 h-20" />
+            <img src="/logo.svg" alt="" className="w-12 h-12 md:w-20 md:h-20" />
             <div>
               <h1 className="text-lg font-extrabold text-slate-900 leading-none">
                 {translations.appTitle}
@@ -45,7 +45,7 @@ function App() {
               <div className="flex items-center gap-0.5 text-xs font-bold text-muted">
                 <IconButton
                   label={translations.previousYear}
-                  className="w-5 h-5 rounded hover:bg-slate-100 hover:text-slate-700"
+                  className="w-8 h-8 md:w-5 md:h-5 rounded hover:bg-slate-100 hover:text-slate-700"
                   onClick={() => setYear((y) => y - 1)}
                 >
                   <ChevronLeft size={13} />
@@ -53,7 +53,7 @@ function App() {
                 <span className="tabular-nums">{calendar.year}</span>
                 <IconButton
                   label={translations.nextYear}
-                  className="w-5 h-5 rounded hover:bg-slate-100 hover:text-slate-700"
+                  className="w-8 h-8 md:w-5 md:h-5 rounded hover:bg-slate-100 hover:text-slate-700"
                   onClick={() => setYear((y) => y + 1)}
                 >
                   <ChevronRight size={13} />
@@ -62,29 +62,30 @@ function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Phones: balances wrap onto their own row below the title and settings button. */}
+          <div className="order-last grid w-full grid-cols-2 gap-2 md:order-none md:ml-auto md:flex md:w-auto md:items-center md:gap-3">
             <BalanceSummary year={calendar.year} projection={projection} />
-
-            <IconButton
-              label={translations.settingsTooltip}
-              variant="outline"
-              className="w-10 h-10 rounded-full shadow-sm"
-              onClick={() => setIsSettingsOpen(true)}
-            >
-              <SettingsIcon size={18} />
-            </IconButton>
           </div>
+
+          <IconButton
+            label={translations.settingsTooltip}
+            variant="outline"
+            className="w-10 h-10 rounded-full shadow-sm"
+            onClick={() => setIsSettingsOpen(true)}
+          >
+            <SettingsIcon size={18} />
+          </IconButton>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-4">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-4">
         {Object.keys(plan).length === 0 && (
           <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-white/80 px-4 py-3 text-xs font-bold text-slate-600 animate-enter-up">
             <MousePointerClick size={14} className="text-muted shrink-0" />
             {isTouchScreen ? translations.firstRunHintTouch : translations.firstRunHint}
           </div>
         )}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4 animate-enter-up">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 md:gap-4 animate-enter-up">
           {Array.from({ length: 12 })
             .map((_, i) => i)
             .filter((i) => {

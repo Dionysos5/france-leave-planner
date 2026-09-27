@@ -42,6 +42,14 @@ body {
   -webkit-touch-callout: none;
 }
 
+/* Phones: one month per row, so square cells would make each month a full screen. */
+@media (max-width: 639px) {
+  .day-cell {
+    aspect-ratio: auto;
+    height: 2.25rem;
+  }
+}
+
 @keyframes overlay-in {
   from {
     opacity: 0;

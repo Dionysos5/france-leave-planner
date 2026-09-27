@@ -22,8 +22,8 @@ const LeaveToolbar = ({
 }: LeaveToolbarProps) => {
   const { locale, translations } = useTranslation();
   return (
-    <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
-      <div className="bg-white/90 backdrop-blur-sm border border-slate-200 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] rounded-xl p-1.5 flex items-center gap-1">
+    <div className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] md:bottom-10 z-50 flex justify-center pointer-events-none">
+      <div className="pointer-events-auto max-w-full overflow-x-auto bg-white/90 backdrop-blur-sm border border-slate-200 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] rounded-xl p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1">
         {Object.values(LeaveType).map((type) => (
           <Button
             key={type}
@@ -32,8 +32,11 @@ const LeaveToolbar = ({
             onClick={() => setActiveTool(type)}
           >
             <span className={`w-2.5 h-2.5 rounded-sm ${LEAVE_TYPES[type].dotClass}`} />
-            {LEAVE_TYPES[type].label[locale]}
-            <Kbd tone={activeTool === type ? 'dark' : 'light'}>{displayKeyForTool(type)}</Kbd>
+            <span className="sm:hidden">{LEAVE_TYPES[type].shortLabel[locale]}</span>
+            <span className="hidden sm:inline">{LEAVE_TYPES[type].label[locale]}</span>
+            <span className="hidden sm:contents">
+              <Kbd tone={activeTool === type ? 'dark' : 'light'}>{displayKeyForTool(type)}</Kbd>
+            </span>
           </Button>
         ))}
 
@@ -43,10 +46,13 @@ const LeaveToolbar = ({
           variant={activeTool === null ? 'solid' : 'ghost'}
           aria-pressed={activeTool === null}
           onClick={() => setActiveTool(null)}
+          aria-label={translations.eraser}
         >
           <Eraser size={14} />
-          {translations.eraser}
-          <Kbd tone={activeTool === null ? 'dark' : 'light'}>{displayKeyForTool(null)}</Kbd>
+          <span className="hidden sm:contents">
+            {translations.eraser}
+            <Kbd tone={activeTool === null ? 'dark' : 'light'}>{displayKeyForTool(null)}</Kbd>
+          </span>
         </Button>
 
         <div className="w-px h-5 bg-slate-200 mx-1" />
