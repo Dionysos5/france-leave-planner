@@ -34,3 +34,14 @@ describe('displayKeyForTool', () => {
     expect(displayKeyForTool(null)).toBe('5');
   });
 });
+
+describe('shortcuts', () => {
+  test('every tool has its own key', () => {
+    const tools = [...Object.values(LeaveType), null];
+    const keys = tools.map(displayKeyForTool);
+    expect(new Set(keys).size).toBe(tools.length);
+    for (const tool of tools) {
+      expect(toolForKey(`Digit${displayKeyForTool(tool)}`)).toBe(tool);
+    }
+  });
+});

@@ -1,10 +1,8 @@
-import type { LeaveType } from '@core';
 import type { Locale } from '@shared/types';
 
 export interface Translations {
   appTitle: string;
   settingsTooltip: string;
-  leaveLabels: Record<LeaveType, string>;
   eraser: string;
   close: string;
   showPast: string;
@@ -37,12 +35,6 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
   en: {
     appTitle: 'Leave Planner',
     settingsTooltip: 'Settings',
-    leaveLabels: {
-      CP: 'Paid Leave (CP)',
-      RTT: 'RTT',
-      UNPAID: 'Unpaid Leave',
-      SICK: 'Sick Leave',
-    },
     eraser: 'Eraser',
     close: 'Close',
     showPast: 'Show past months',
@@ -87,12 +79,6 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
   fr: {
     appTitle: 'Planificateur de congés',
     settingsTooltip: 'Paramètres',
-    leaveLabels: {
-      CP: 'Congés Payés (CP)',
-      RTT: 'RTT',
-      UNPAID: 'Sans solde',
-      SICK: 'Arrêt maladie',
-    },
     eraser: 'Gomme',
     close: 'Fermer',
     showPast: 'Afficher les mois passés',

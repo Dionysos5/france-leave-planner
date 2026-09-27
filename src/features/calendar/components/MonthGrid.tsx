@@ -1,5 +1,5 @@
 import { Tooltip } from '@components/ui/Tooltip';
-import { LEAVE_COLORS } from '@constants';
+import { LEAVE_TYPES } from '@constants';
 import type { LeaveType, Plan } from '@core';
 import { formatDate, getDayInfo, getMonthDays, isToday, type YearCalendar } from '@core';
 import { useTranslation } from '@i18n/LocaleContext';
@@ -61,7 +61,7 @@ const MonthGrid = ({
 
     // Apply Styles
     if (leaveType) {
-      bgClass = LEAVE_COLORS[leaveType];
+      bgClass = LEAVE_TYPES[leaveType].cellClass;
       textClass = 'text-white font-bold';
       borderClass = 'border-transparent';
     } else if (holiday) {
@@ -78,7 +78,7 @@ const MonthGrid = ({
     if (selection.has(dateStr) && !isWknd && !holiday) {
       if (activeTool) {
         // Show active tool color
-        bgClass = LEAVE_COLORS[activeTool];
+        bgClass = LEAVE_TYPES[activeTool].cellClass;
         textClass = 'text-white font-bold';
       } else {
         // Eraser preview (white/cleared)

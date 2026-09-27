@@ -1,26 +1,28 @@
-import { LeaveType } from '@core';
+import { ERASER_SHORTCUT, LEAVE_TYPES } from '@constants';
+import type { LeaveType } from '@core';
 import { useEffect } from 'react';
 
-const TOOL_KEYS: Record<string, LeaveType | null> = {
-  Digit1: LeaveType.CP,
-  Digit2: LeaveType.RTT,
-  Digit3: LeaveType.UNPAID,
-  Digit4: LeaveType.SICK,
-  Digit5: null,
-  Numpad1: LeaveType.CP,
-  Numpad2: LeaveType.RTT,
-  Numpad3: LeaveType.UNPAID,
-  Numpad4: LeaveType.SICK,
-  Numpad5: null,
-};
+const SHORTCUTS: [string, LeaveType | null][] = [
+  ...Object.entries(LEAVE_TYPES).map(
+    ([type, { shortcut }]) => [shortcut, type as LeaveType] as [string, LeaveType]
+  ),
+  [ERASER_SHORTCUT, null],
+];
+
+// Physical key codes, so the shortcuts work on AZERTY keyboards without Shift.
+const TOOL_KEYS: Record<string, LeaveType | null> = Object.fromEntries(
+  SHORTCUTS.flatMap(([digit, tool]) => [
+    [`Digit${digit}`, tool],
+    [`Numpad${digit}`, tool],
+  ])
+);
 
 export const toolForKey = (code: string): LeaveType | null | undefined => {
   return TOOL_KEYS[code];
 };
 
 export const displayKeyForTool = (tool: LeaveType | null): string => {
-  const code = Object.entries(TOOL_KEYS).find(([, value]) => value === tool)?.[0];
-  return code?.replace(/^(Digit|Key)/, '') ?? '';
+  return tool === null ? ERASER_SHORTCUT : LEAVE_TYPES[tool].shortcut;
 };
 
 const isTypingTarget = (target: EventTarget | null): boolean => {

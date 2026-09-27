@@ -1,6 +1,6 @@
 import { Button, IconButton } from '@components/ui/Button';
 import { Kbd } from '@components/ui/Kbd';
-import { LEAVE_DOT_COLORS } from '@constants';
+import { LEAVE_TYPES } from '@constants';
 import { LeaveType } from '@core';
 import { displayKeyForTool } from '@hooks/useKeyboardShortcuts';
 import { useTranslation } from '@i18n/LocaleContext';
@@ -20,7 +20,7 @@ const LeaveToolbar = ({
   uiPreferences,
   setUiPreferences,
 }: LeaveToolbarProps) => {
-  const { translations } = useTranslation();
+  const { locale, translations } = useTranslation();
   return (
     <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
       <div className="bg-white/90 backdrop-blur-sm border border-slate-200 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] rounded-xl p-1.5 flex items-center gap-1">
@@ -31,8 +31,8 @@ const LeaveToolbar = ({
             aria-pressed={activeTool === type}
             onClick={() => setActiveTool(type)}
           >
-            <span className={`w-2.5 h-2.5 rounded-sm ${LEAVE_DOT_COLORS[type]}`} />
-            {translations.leaveLabels[type]}
+            <span className={`w-2.5 h-2.5 rounded-sm ${LEAVE_TYPES[type].dotClass}`} />
+            {LEAVE_TYPES[type].label[locale]}
             <Kbd tone={activeTool === type ? 'dark' : 'light'}>{displayKeyForTool(type)}</Kbd>
           </Button>
         ))}
