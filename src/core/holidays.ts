@@ -1,5 +1,6 @@
-import { buildYearCalendar, type PublicHoliday, type YearCalendar } from '@core';
 import { addDays, format } from 'date-fns';
+import { buildYearCalendar } from './calendar';
+import type { PublicHoliday, YearCalendar } from './types';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
 

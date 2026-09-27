@@ -1,5 +1,4 @@
-import { frenchCalendar } from '@constants';
-import { LeaveType } from '@core';
+import { frenchCalendar, LeaveType } from '@core';
 import { useMemo, useState } from 'react';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 

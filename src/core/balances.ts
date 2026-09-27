@@ -1,4 +1,5 @@
 import { formatDate, getMonthDays, isWorkableDay } from './calendar';
+import { frenchCalendar } from './holidays';
 import {
   CP_PER_MONTH,
   CP_PERIOD_START_MONTH,
@@ -40,7 +41,7 @@ export const projectYear = (
   year: number,
   plan: Plan,
   settings: LeaveSettings,
-  calendarFor: CalendarForYear
+  calendarFor: CalendarForYear = frenchCalendar
 ): YearProjection => {
   const checkpoints = new Map(settings.checkpoints.map((c) => [c.dateStr, c]));
   const earliestYear = Math.min(

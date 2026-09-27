@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { frenchCalendar } from '@constants';
+import { frenchCalendar } from './holidays';
 import { FORFAIT_DAYS, forfaitRestDays, rttCostPerUnpaidDay } from './rules';
 
 describe('forfaitRestDays', () => {

@@ -1,4 +1,3 @@
-import { frenchCalendar } from '@constants';
 import {
   applyRange,
   applyToggle,
@@ -22,11 +21,8 @@ export const useLeavePlan = (calendar: YearCalendar, activeTool: LeaveType | nul
   const [uiPreferences, setUiPreferences] = useState<UIPreferences>(persisted.uiPreferences);
 
   const projection = useMemo(
-    () =>
-      projectYear(calendar.year, plan, settings, (year) =>
-        year === calendar.year ? calendar : frenchCalendar(year)
-      ),
-    [calendar, plan, settings]
+    () => projectYear(calendar.year, plan, settings),
+    [calendar.year, plan, settings]
   );
 
   useEffect(() => {
