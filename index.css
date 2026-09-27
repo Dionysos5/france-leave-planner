@@ -22,6 +22,11 @@
   --color-wfh-ink: #3f5233;
 }
 
+/* Keep the scrollbar's space when the page gets short (e.g. past months hidden), so nothing shifts sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: "Plus Jakarta Sans", sans-serif;
   background-color: #fcfcfc;
