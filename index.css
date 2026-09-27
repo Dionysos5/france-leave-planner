@@ -2,19 +2,22 @@
 
 @theme {
   --color-muted: #64748b;
-  --color-leave-cp: #3b82f6;
-  --color-leave-cp-hover: #2563eb;
-  --color-leave-rtt: #a855f7;
-  --color-leave-rtt-hover: #9333ea;
-  --color-leave-unpaid: #f97316;
-  --color-leave-unpaid-hover: #ea580c;
-  --color-leave-sick: #14b8a6;
-  --color-leave-sick-hover: #0d9488;
-  /* WFH is a worked day: a light tint, so leave stays the loudest color. */
-  --color-wfh-tint: #ecfccb;
-  --color-wfh-tint-hover: #d9f99d;
-  --color-wfh-border: #a3e635;
-  --color-wfh-ink: #3f6212;
+  /* Leave fills carry white day numbers: each is at least 5:1 (WCAG AA needs 4.5:1).
+     RTT is a magenta purple: plain purple looks like CP blue with deuteranopia. */
+  --color-leave-cp: #2563eb;
+  --color-leave-cp-hover: #1d4ed8;
+  --color-leave-rtt: #86198f;
+  --color-leave-rtt-hover: #701a75;
+  --color-leave-unpaid: #c2410c;
+  --color-leave-unpaid-hover: #9a3412;
+  --color-leave-sick: #0f766e;
+  --color-leave-sick-hover: #115e59;
+  /* WFH is a worked day: a muted tint, so leave stays the loudest color.
+     Ink on tint 7.5:1; the border carries the shape against white at 3.4:1 (needs 3:1). */
+  --color-wfh-tint: #eef2ea;
+  --color-wfh-tint-hover: #e2e9dc;
+  --color-wfh-border: #7d9170;
+  --color-wfh-ink: #3f5233;
 }
 
 body {
