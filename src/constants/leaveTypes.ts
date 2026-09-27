@@ -6,7 +6,7 @@ interface LeaveTypeDescriptor {
   /** Number key that selects the tool (top row or numpad). */
   shortcut: string;
   label: Record<Locale, string>;
-  /** Label for narrow screens; without one the tool shows only its icon there. */
+  /** Label for narrow screens, when it differs from `label`. */
   shortLabel?: Record<Locale, string>;
   /** Classes for a painted day: background, text and border. Colors are defined in index.css. */
   cellClass: string;

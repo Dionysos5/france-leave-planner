@@ -1,11 +1,13 @@
-import { Button, IconButton } from '@components/ui/Button';
+import { Button } from '@components/ui/Button';
 import { Kbd } from '@components/ui/Kbd';
 import { LEAVE_TYPES } from '@constants';
 import { LeaveType } from '@core';
 import { displayKeyForTool } from '@hooks/useKeyboardShortcuts';
 import { useTranslation } from '@i18n/LocaleContext';
 import type { UIPreferences } from '@shared/types';
-import { Eraser, Eye, EyeOff } from 'lucide-react';
+import { Eraser } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { HidePastToggle } from './HidePastToggle';
 
 const LEAVE_TOOLS = Object.values(LeaveType).filter((type) => LEAVE_TYPES[type].isLeave);
 const OTHER_TOOLS = Object.values(LeaveType).filter((type) => !LEAVE_TYPES[type].isLeave);
@@ -17,6 +19,8 @@ interface LeaveToolbarProps {
   setUiPreferences: (prefs: UIPreferences) => void;
 }
 
+const Divider = () => <div className="w-px h-5 shrink-0 bg-slate-200 mx-0.5 sm:mx-1" />;
+
 const LeaveToolbar = ({
   activeTool,
   setActiveTool,
@@ -25,70 +29,66 @@ const LeaveToolbar = ({
 }: LeaveToolbarProps) => {
   const { locale, translations } = useTranslation();
 
-  const toolButton = (type: LeaveType) => {
-    const { swatch, label, shortLabel } = LEAVE_TYPES[type];
-    const active = activeTool === type;
+  // Phones only have room for one label: inactive tools show just their swatch.
+  const toolButton = (
+    tool: LeaveType | null,
+    swatch: ReactNode,
+    label: string,
+    phoneLabel: string
+  ) => {
+    const active = activeTool === tool;
     return (
       <Button
-        key={type}
+        key={tool ?? 'eraser'}
         variant={active ? 'solid' : 'ghost'}
         aria-pressed={active}
-        aria-label={shortLabel ? undefined : label[locale]}
-        onClick={() => setActiveTool(type)}
+        aria-label={label}
+        className="shrink-0"
+        onClick={() => setActiveTool(tool)}
       >
-        {'icon' in swatch ? (
-          <swatch.icon size={14} aria-hidden />
-        ) : (
-          <span className={`w-2.5 h-2.5 rounded-sm ${swatch.dotClass}`} />
-        )}
-        {shortLabel && <span className="sm:hidden">{shortLabel[locale]}</span>}
-        <span className="hidden sm:inline">{label[locale]}</span>
+        {swatch}
+        {active && <span className="sm:hidden">{phoneLabel}</span>}
+        <span className="hidden sm:inline">{label}</span>
         <span className="hidden sm:contents">
-          <Kbd tone={active ? 'dark' : 'light'}>{displayKeyForTool(type)}</Kbd>
+          <Kbd tone={active ? 'dark' : 'light'}>{displayKeyForTool(tool)}</Kbd>
         </span>
       </Button>
+    );
+  };
+
+  const dayTypeButton = (type: LeaveType) => {
+    const { swatch, label, shortLabel } = LEAVE_TYPES[type];
+    return toolButton(
+      type,
+      'icon' in swatch ? (
+        <swatch.icon size={14} aria-hidden />
+      ) : (
+        <span className={`w-2.5 h-2.5 rounded-sm ${swatch.dotClass}`} />
+      ),
+      label[locale],
+      (shortLabel ?? label)[locale]
     );
   };
 
   return (
     <div className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] md:bottom-10 z-50 flex justify-center pointer-events-none">
       <div className="pointer-events-auto max-w-full overflow-x-auto bg-white/90 backdrop-blur-sm border border-slate-200 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] rounded-xl p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1">
-        {LEAVE_TOOLS.map(toolButton)}
+        {LEAVE_TOOLS.map(dayTypeButton)}
+        <Divider />
+        {toolButton(
+          null,
+          <Eraser size={14} aria-hidden />,
+          translations.eraser,
+          translations.eraser
+        )}
+        <Divider />
+        {OTHER_TOOLS.map(dayTypeButton)}
 
-        <div className="w-px h-5 bg-slate-200 mx-1" />
-
-        <Button
-          variant={activeTool === null ? 'solid' : 'ghost'}
-          aria-pressed={activeTool === null}
-          onClick={() => setActiveTool(null)}
-          aria-label={translations.eraser}
-        >
-          <Eraser size={14} />
-          <span className="hidden sm:contents">
-            {translations.eraser}
-            <Kbd tone={activeTool === null ? 'dark' : 'light'}>{displayKeyForTool(null)}</Kbd>
-          </span>
-        </Button>
-
-        <div className="w-px h-5 bg-slate-200 mx-1" />
-
-        {OTHER_TOOLS.map(toolButton)}
-
-        <div className="w-px h-5 bg-slate-200 mx-1" />
-
-        <IconButton
-          label={uiPreferences.hidePastMonths ? translations.showPast : translations.hidePast}
-          pressed={uiPreferences.hidePastMonths}
-          variant={uiPreferences.hidePastMonths ? 'solid' : 'ghost'}
-          onClick={() =>
-            setUiPreferences({
-              ...uiPreferences,
-              hidePastMonths: !uiPreferences.hidePastMonths,
-            })
-          }
-        >
-          {uiPreferences.hidePastMonths ? <Eye size={14} /> : <EyeOff size={14} />}
-        </IconButton>
+        {/* On phones the toggle lives in the header to leave room for the tools. */}
+        <div className="hidden sm:contents">
+          <Divider />
+          <HidePastToggle uiPreferences={uiPreferences} setUiPreferences={setUiPreferences} />
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { IconButton } from '@components/ui/Button';
 import BalanceSummary from '@features/balances/components/BalanceSummary';
+import { HidePastToggle } from '@features/calendar/components/HidePastToggle';
 import LeaveToolbar from '@features/calendar/components/LeaveToolbar';
 import MonthGrid from '@features/calendar/components/MonthGrid';
 import SettingsPanel from '@features/settings/components/SettingsPanel';
@@ -36,10 +37,10 @@ function App() {
     <div className="min-h-screen pb-28">
       <header className="px-4 pt-4 pb-2 md:px-6 md:pt-8 md:pb-4 max-w-7xl mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="" className="w-12 h-12 md:w-20 md:h-20" />
-            <div>
-              <h1 className="text-lg font-extrabold text-slate-900 leading-none">
+          <div className="flex min-w-0 flex-1 items-center gap-3 md:flex-none">
+            <img src="/logo.svg" alt="" className="w-10 h-10 shrink-0 md:w-20 md:h-20" />
+            <div className="min-w-0">
+              <h1 className="text-base md:text-lg font-extrabold text-slate-900 leading-tight md:leading-none">
                 {translations.appTitle}
               </h1>
               <div className="flex items-center gap-0.5 text-xs font-bold text-muted">
@@ -67,14 +68,21 @@ function App() {
             <BalanceSummary year={calendar.year} projection={projection} />
           </div>
 
-          <IconButton
-            label={translations.settingsTooltip}
-            variant="outline"
-            className="w-10 h-10 rounded-full shadow-sm"
-            onClick={() => setIsSettingsOpen(true)}
-          >
-            <SettingsIcon size={18} />
-          </IconButton>
+          <div className="flex items-center gap-2">
+            <HidePastToggle
+              uiPreferences={uiPreferences}
+              setUiPreferences={setUiPreferences}
+              className="w-10 h-10 rounded-full sm:hidden"
+            />
+            <IconButton
+              label={translations.settingsTooltip}
+              variant="outline"
+              className="w-10 h-10 rounded-full shadow-sm"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <SettingsIcon size={18} />
+            </IconButton>
+          </div>
         </div>
       </header>
 
