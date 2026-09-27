@@ -1,14 +1,15 @@
 import { describe, expect, test } from 'bun:test';
 import { projectYear } from './balances';
 import { buildYearCalendar } from './calendar';
-import { CP_PER_MONTH, FORFAIT_DAYS } from './rules';
+import { CP_PER_MONTH } from './rules';
 import { type BalanceCheckpoint, LeaveType, type Plan } from './types';
 
 const { CP, RTT, UNPAID, SICK } = LeaveType;
 
 // Without public holidays, 2024 has 262 weekdays (19 RTT) and 2023 has 260 (17 RTT).
 const NO_HOLIDAYS = (year: number) => buildYearCalendar(year, []);
-const RTT_2024 = 19;
+const RTT_2024_PER_MONTH = 19 / 12;
+const RTT_2023_PER_MONTH = 17 / 12;
 const JANUARY_2024_WEEKDAYS = 23;
 
 const project = (year: number, plan: Plan, checkpoints: BalanceCheckpoint[] = []) =>
@@ -23,12 +24,12 @@ const checkpoint = (dateStr: string, cpPrevious: number, cpCurrent: number, rtt:
 });
 
 describe('projectYear', () => {
-  test('without checkpoints CP starts from zero and RTT is granted on January 1', () => {
+  test('without checkpoints CP and RTT start from zero and accrue monthly', () => {
     const { months } = project(2024, {});
     expect(months).toHaveLength(12);
     expect(months[0].cpPrevious).toBe(0);
     expect(months[0].cpCurrent).toBeCloseTo(CP_PER_MONTH, 3);
-    expect(months[0].rtt).toBe(RTT_2024);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
   });
 
   test('CP N rolls into CP N-1 on June 1', () => {
@@ -38,9 +39,16 @@ describe('projectYear', () => {
     expect(months[5].cpCurrent).toBeCloseTo(CP_PER_MONTH, 3);
   });
 
-  test('a full year earns 25 CP', () => {
+  test('a full year earns 25 CP and the forfait RTT', () => {
     const { months } = project(2024, {});
     expect(months[11].cpPrevious + months[11].cpCurrent).toBeCloseTo(25, 3);
+    expect(months[11].rtt).toBeCloseTo(19, 3);
+  });
+
+  test('an August payslip checkpoint keeps earning RTT through December', () => {
+    const { months } = project(2024, {}, [checkpoint('2024-08-31', 0, 0, 3)]);
+    expect(months[7].rtt).toBe(3);
+    expect(months[11].rtt).toBeCloseTo(3 + 4 * RTT_2024_PER_MONTH, 3);
   });
 
   test('CP is taken from N-1 first, then from N', () => {
@@ -59,42 +67,45 @@ describe('projectYear', () => {
     const { months } = project(2024, {}, [checkpoint('2023-06-01', 10, 0, 5)]);
     expect(months[0].cpPrevious).toBe(10);
     expect(months[0].cpCurrent).toBeCloseTo(8 * CP_PER_MONTH, 3);
-    expect(months[0].rtt).toBe(RTT_2024);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
   });
 
   test('RTT left on December 31 is lost', () => {
     const { rttLostOnDec31 } = project(2023, {}, [checkpoint('2023-06-01', 0, 0, 5)]);
-    expect(rttLostOnDec31).toBe(5);
+    expect(rttLostOnDec31).toBeCloseTo(5 + 7 * RTT_2023_PER_MONTH, 3);
   });
 
   test('an RTT day uses one RTT', () => {
     const { months, rttLostOnDec31 } = project(2024, { '2024-01-02': RTT });
-    expect(months[0].rtt).toBe(RTT_2024 - 1);
-    expect(rttLostOnDec31).toBe(RTT_2024 - 1);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH - 1, 3);
+    expect(rttLostOnDec31).toBeCloseTo(19 - 1, 3);
   });
 
   test('leave on weekends is ignored', () => {
     const { months } = project(2024, { '2024-01-06': CP, '2024-01-07': RTT });
     expect(months[0].cpCurrent).toBeCloseTo(CP_PER_MONTH, 3);
-    expect(months[0].rtt).toBe(RTT_2024);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
   });
 
-  test('unpaid leave reduces CP accrual and RTT in proportion', () => {
+  test('unpaid leave reduces CP and RTT accrual in proportion', () => {
     const { months } = project(2024, { '2024-01-02': UNPAID });
     expect(months[0].cpCurrent).toBeCloseTo(
       (CP_PER_MONTH * (JANUARY_2024_WEEKDAYS - 1)) / JANUARY_2024_WEEKDAYS,
       3
     );
-    expect(months[0].rtt).toBeCloseTo(RTT_2024 - RTT_2024 / (FORFAIT_DAYS + RTT_2024), 3);
+    expect(months[0].rtt).toBeCloseTo(
+      (RTT_2024_PER_MONTH * (JANUARY_2024_WEEKDAYS - 1)) / JANUARY_2024_WEEKDAYS,
+      3
+    );
   });
 
-  test('sick leave earns 80% of CP and leaves RTT untouched', () => {
+  test('sick leave earns 80% of CP and full RTT', () => {
     const { months } = project(2024, { '2024-01-02': SICK });
     expect(months[0].cpCurrent).toBeCloseTo(
       (CP_PER_MONTH * (JANUARY_2024_WEEKDAYS - 0.2)) / JANUARY_2024_WEEKDAYS,
       3
     );
-    expect(months[0].rtt).toBe(RTT_2024);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
   });
 
   test('a checkpoint resets the running balances mid-year', () => {
@@ -102,7 +113,7 @@ describe('projectYear', () => {
     expect(months[2]).toEqual({
       cpPrevious: 2,
       cpCurrent: Number((7 + CP_PER_MONTH).toFixed(3)),
-      rtt: 4,
+      rtt: Number((4 + RTT_2024_PER_MONTH).toFixed(3)),
     });
   });
 
@@ -113,6 +124,6 @@ describe('projectYear', () => {
 
   test('checkpoints after the projected year are ignored', () => {
     const { months } = project(2024, {}, [checkpoint('2025-03-01', 9, 9, 9)]);
-    expect(months[0].rtt).toBe(RTT_2024);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
   });
 });

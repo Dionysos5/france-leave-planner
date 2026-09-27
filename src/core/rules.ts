@@ -31,16 +31,9 @@ const countWorkableDays = (calendar: YearCalendar): number => {
 
 /**
  * RTT (jours de repos) for the year: weekdays that aren't public holidays, minus CP,
- * minus the forfait. Granted on January 1, forfeited if untaken by December 31.
+ * minus the forfait. Earned in twelfths at the end of each month, forfeited if untaken by
+ * December 31.
  */
 export const forfaitRestDays = (calendar: YearCalendar): number => {
   return Math.max(0, countWorkableDays(calendar) - CP_DAYS_PER_YEAR - FORFAIT_DAYS);
-};
-
-/**
- * RTT lost per unpaid day: the year's RTT spread over the days the employee is expected
- * to be present (forfait + RTT), so a full year of unpaid leave cancels every RTT.
- */
-export const rttCostPerUnpaidDay = (restDays: number): number => {
-  return restDays === 0 ? 0 : restDays / (FORFAIT_DAYS + restDays);
 };

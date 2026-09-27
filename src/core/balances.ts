@@ -4,7 +4,6 @@ import {
   CP_PER_MONTH,
   CP_PERIOD_START_MONTH,
   forfaitRestDays,
-  rttCostPerUnpaidDay,
   SICK_CP_ACCRUAL_RATIO,
 } from './rules';
 import {
@@ -56,21 +55,21 @@ export const projectYear = (
 
   for (let y = startYear; y <= year; y++) {
     const calendar = calendarFor(y);
-    const restDays = forfaitRestDays(calendar);
-    const unpaidRttCost = rttCostPerUnpaidDay(restDays);
+    const rttPerMonth = forfaitRestDays(calendar) / 12;
     months = [];
 
     for (let month = 0; month < 12; month++) {
       const monthDays = getMonthDays(calendar, month);
       const lastDayStr = formatDate(monthDays[monthDays.length - 1]);
       let workableDays = 0;
-      let lostDays = 0;
+      let unpaidDays = 0;
+      let sickDays = 0;
 
       for (const date of monthDays) {
         const dateStr = formatDate(date);
 
         if (date.getDate() === 1 && month === 0) {
-          pools.rtt = restDays;
+          pools.rtt = 0;
         }
         if (date.getDate() === 1 && month === CP_PERIOD_START_MONTH) {
           cpLostOnMay31 = Math.max(0, pools.cpPrevious);
@@ -98,18 +97,19 @@ export const projectYear = (
             pools.rtt -= 1;
             break;
           case LeaveType.UNPAID:
-            pools.rtt -= unpaidRttCost;
-            lostDays += 1;
+            unpaidDays += 1;
             break;
           case LeaveType.SICK:
-            lostDays += 1 - SICK_CP_ACCRUAL_RATIO;
+            sickDays += 1;
             break;
         }
       }
 
       // A checkpoint on the last day of the month already includes that month's accrual.
       if (!checkpoints.has(lastDayStr) && workableDays > 0) {
-        pools.cpCurrent += (CP_PER_MONTH * (workableDays - lostDays)) / workableDays;
+        const cpWorked = workableDays - unpaidDays - sickDays * (1 - SICK_CP_ACCRUAL_RATIO);
+        pools.cpCurrent += (CP_PER_MONTH * cpWorked) / workableDays;
+        pools.rtt += (rttPerMonth * (workableDays - unpaidDays)) / workableDays;
       }
 
       months.push(snapshot(pools));

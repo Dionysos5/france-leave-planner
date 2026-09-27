@@ -70,8 +70,8 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
       rules: (year, rttDays) => [
         'Syntec agreement, cadre au forfait jours (218 days), France métropolitaine.',
         'CP: 25 working days a year, earned June 1 – May 31. CP N-1 not taken by May 31 is lost.',
-        `RTT ${year}: ${rttDays} days, granted January 1, lost if not taken by December 31.`,
-        'Unpaid leave reduces the CP earned that month and the RTT, in proportion.',
+        `RTT ${year}: ${rttDays} days, earned monthly (${(rttDays / 12).toFixed(2)} a month), lost if not taken by December 31.`,
+        'Unpaid leave reduces the CP and RTT earned that month, in proportion.',
         "Sick leave still earns 80% of CP and doesn't reduce RTT.",
       ],
     },
@@ -115,8 +115,8 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
       rules: (year, rttDays) => [
         'Convention Syntec, cadre au forfait jours (218 jours), France métropolitaine.',
         'CP : 25 jours ouvrés par an, acquis du 1er juin au 31 mai. Les CP N-1 non pris au 31 mai sont perdus.',
-        `RTT ${year} : ${rttDays} jours, crédités au 1er janvier, perdus s'ils ne sont pas pris au 31 décembre.`,
-        'Le congé sans solde réduit au prorata les CP acquis dans le mois et les RTT.',
+        `RTT ${year} : ${rttDays} jours, acquis chaque mois (${(rttDays / 12).toFixed(2).replace('.', ',')} par mois), perdus s'ils ne sont pas pris au 31 décembre.`,
+        'Le congé sans solde réduit au prorata les CP et RTT acquis dans le mois.',
         "L'arrêt maladie acquiert 80 % des CP et ne réduit pas les RTT.",
       ],
     },

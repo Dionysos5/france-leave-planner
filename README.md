@@ -7,8 +7,8 @@ Built for one profile: a **cadre au forfait jours (218 days) under the Syntec ag
 ## Features
 
 - **Visual planning** — click or drag days to paint leave; weekends and public holidays are handled automatically
-- **Syntec rules built in** — CP earned June 1 – May 31 (25 jours ouvrés) with N-1 days lost after May 31; RTT computed each year from the forfait (e.g. 9 in 2026, 11 in 2027), granted January 1 and lost after December 31
-- **Absences** — unpaid leave reduces CP accrual and RTT in proportion; sick leave still earns 80% of CP
+- **Syntec rules built in** — CP earned June 1 – May 31 (25 jours ouvrés) with N-1 days lost after May 31; RTT computed each year from the forfait (e.g. 9 in 2026, 11 in 2027), earned in twelfths each month and lost after December 31
+- **Absences** — unpaid leave reduces CP and RTT accrual in proportion; sick leave still earns 80% of CP
 - **Balance checkpoints** — copy CP N-1, CP N and RTT from a payslip at any date; the projection corrects itself from there and carries over across years
 - **Any year** — public holidays (including the Easter-based ones) are generated for the year you're viewing
 - **Bilingual** — French and English UI
