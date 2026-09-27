@@ -11,6 +11,8 @@ export interface Translations {
   hidePast: string;
   cpBalance: string;
   rttBalance: string;
+  cpBreakdown: (previous: string, current: string) => string;
+  lostOn: (days: string, date: string) => string;
   firstRunHint: string;
   previousYear: string;
   nextYear: string;
@@ -20,12 +22,14 @@ export interface Translations {
     languageSection: string;
     balancesSection: string;
     asOf: string;
+    checkpointHint: string;
     addCheckpoint: string;
     removeCheckpoint: string;
-    cpSection: string;
-    rttSection: string;
-    monthlyEarned: string;
-    unpaidNote: string;
+    cpPrevious: string;
+    cpCurrent: string;
+    rtt: string;
+    rulesSection: string;
+    rules: (year: number, rttDays: number) => string[];
   };
 }
 
@@ -37,6 +41,7 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
       CP: 'Paid Leave (CP)',
       RTT: 'RTT',
       UNPAID: 'Unpaid Leave',
+      SICK: 'Sick Leave',
     },
     eraser: 'Eraser',
     close: 'Close',
@@ -44,7 +49,9 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     hidePast: 'Hide past months',
     cpBalance: 'CP Balance',
     rttBalance: 'RTT Balance',
-    firstRunHint: 'Click or drag days to paint your leave — 1–4 switch tools.',
+    cpBreakdown: (previous, current) => `CP N-1: ${previous} · CP N: ${current}`,
+    lostOn: (days, date) => `${days} lost ${date}`,
+    firstRunHint: 'Click or drag days to paint your leave — 1–5 switch tools.',
     previousYear: 'Previous year',
     nextYear: 'Next year',
     weekdays: [
@@ -61,13 +68,20 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
       languageSection: 'Language',
       balancesSection: 'Balance checkpoints',
       asOf: 'As of',
+      checkpointHint: 'Copy the balances from your latest payslip.',
       addCheckpoint: 'Add a known balance',
       removeCheckpoint: 'Remove',
-      cpSection: 'Paid Leave (CP)',
-      rttSection: 'RTT',
-      monthlyEarned: 'Monthly Earned',
-      unpaidNote:
-        '* Unpaid leave reduces monthly acquisition proportionally based on the number of working days in that month.',
+      cpPrevious: 'CP N-1',
+      cpCurrent: 'CP N',
+      rtt: 'RTT',
+      rulesSection: 'Rules applied',
+      rules: (year, rttDays) => [
+        'Syntec agreement, cadre au forfait jours (218 days), France métropolitaine.',
+        'CP: 25 working days a year, earned June 1 – May 31. CP N-1 not taken by May 31 is lost.',
+        `RTT ${year}: ${rttDays} days, granted January 1, lost if not taken by December 31.`,
+        'Unpaid leave reduces the CP earned that month and the RTT, in proportion.',
+        "Sick leave still earns 80% of CP and doesn't reduce RTT.",
+      ],
     },
   },
   fr: {
@@ -77,6 +91,7 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
       CP: 'Congés Payés (CP)',
       RTT: 'RTT',
       UNPAID: 'Sans solde',
+      SICK: 'Arrêt maladie',
     },
     eraser: 'Gomme',
     close: 'Fermer',
@@ -84,8 +99,10 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     hidePast: 'Masquer les mois passés',
     cpBalance: 'Solde CP',
     rttBalance: 'Solde RTT',
+    cpBreakdown: (previous, current) => `CP N-1 : ${previous} · CP N : ${current}`,
+    lostOn: (days, date) => `${days} perdus le ${date}`,
     firstRunHint:
-      "Cliquez ou glissez sur les jours pour poser vos congés — 1 à 4 pour changer d'outil.",
+      "Cliquez ou glissez sur les jours pour poser vos congés — 1 à 5 pour changer d'outil.",
     previousYear: 'Année précédente',
     nextYear: 'Année suivante',
     weekdays: [
@@ -102,13 +119,20 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
       languageSection: 'Langue',
       balancesSection: 'Soldes de référence',
       asOf: 'Au',
+      checkpointHint: 'Recopiez les soldes de votre dernier bulletin de paie.',
       addCheckpoint: 'Ajouter un solde connu',
       removeCheckpoint: 'Supprimer',
-      cpSection: 'Congés Payés (CP)',
-      rttSection: 'RTT',
-      monthlyEarned: 'Acquis par mois',
-      unpaidNote:
-        "* Les congés non payés réduisent l'acquisition mensuelle proportionnellement au nombre de jours ouvrés du mois.",
+      cpPrevious: 'CP N-1',
+      cpCurrent: 'CP N',
+      rtt: 'RTT',
+      rulesSection: 'Règles appliquées',
+      rules: (year, rttDays) => [
+        'Convention Syntec, cadre au forfait jours (218 jours), France métropolitaine.',
+        'CP : 25 jours ouvrés par an, acquis du 1er juin au 31 mai. Les CP N-1 non pris au 31 mai sont perdus.',
+        `RTT ${year} : ${rttDays} jours, crédités au 1er janvier, perdus s'ils ne sont pas pris au 31 décembre.`,
+        'Le congé sans solde réduit au prorata les CP acquis dans le mois et les RTT.',
+        "L'arrêt maladie acquiert 80 % des CP et ne réduit pas les RTT.",
+      ],
     },
   },
 };

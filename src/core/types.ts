@@ -4,6 +4,7 @@ export const LeaveType = {
   CP: 'CP',
   RTT: 'RTT',
   UNPAID: 'UNPAID',
+  SICK: 'SICK',
 } as const;
 export type LeaveType = (typeof LeaveType)[keyof typeof LeaveType];
 
@@ -14,15 +15,18 @@ export interface PublicHoliday {
   name: Record<Language, string>;
 }
 
+/** Balances as printed on a payslip, applied at the start of `dateStr`. */
 export interface BalanceCheckpoint {
   dateStr: string;
-  balanceCP: number;
-  balanceRTT: number;
+  /** CP N-1: earned in the previous reference period, lost if untaken by May 31. */
+  cpPrevious: number;
+  /** CP N: being earned in the current reference period. */
+  cpCurrent: number;
+  /** RTT left in the calendar year. */
+  rtt: number;
 }
 
 export interface LeaveSettings {
-  accrualRateCP: number;
-  accrualRateRTT: number;
   checkpoints: BalanceCheckpoint[];
 }
 
@@ -39,6 +43,16 @@ export interface DayInfo {
 }
 
 export interface MonthBalance {
-  balanceCP: number;
-  balanceRTT: number;
+  cpPrevious: number;
+  cpCurrent: number;
+  rtt: number;
+}
+
+export interface YearProjection {
+  /** Balances at the end of each month of the year. */
+  months: MonthBalance[];
+  /** CP N-1 still untaken at the end of May 31, forfeited on June 1. */
+  cpLostOnMay31: number;
+  /** RTT still untaken at the end of December 31, forfeited on January 1. */
+  rttLostOnDec31: number;
 }

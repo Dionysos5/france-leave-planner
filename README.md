@@ -1,13 +1,16 @@
 # France Leave Planner
 
-Plan your French leave days visually — paint CP, RTT and unpaid days onto a year calendar and watch your balances update as you go.
+Plan your leave days visually — paint CP, RTT, unpaid and sick days onto a year calendar and watch your balances update as you go.
+
+Built for one profile: a **cadre au forfait jours (218 days) under the Syntec agreement (IDCC 1486), France métropolitaine**.
 
 ## Features
 
 - **Visual planning** — click or drag days to paint leave; weekends and public holidays are handled automatically
-- **Balance checkpoints** — enter a balance you know from your HR portal at any date; the projection corrects itself from there
+- **Syntec rules built in** — CP earned June 1 – May 31 (25 jours ouvrés) with N-1 days lost after May 31; RTT computed each year from the forfait (e.g. 9 in 2026, 11 in 2027), granted January 1 and lost after December 31
+- **Absences** — unpaid leave reduces CP accrual and RTT in proportion; sick leave still earns 80% of CP
+- **Balance checkpoints** — copy CP N-1, CP N and RTT from a payslip at any date; the projection corrects itself from there and carries over across years
 - **Any year** — public holidays (including the Easter-based ones) are generated for the year you're viewing
-- **Balance projections** — monthly CP/RTT ledger with the year-end reference labeled in the header
 - **Bilingual** — French and English UI
 - **Local-first** — your plan stays in your browser; older saved formats migrate automatically
 
@@ -18,7 +21,8 @@ Plan your French leave days visually — paint CP, RTT and unpaid days onto a ye
 | 1 | CP tool |
 | 2 | RTT tool |
 | 3 | Unpaid tool |
-| 4 | Eraser |
+| 4 | Sick tool |
+| 5 | Eraser |
 
 Shortcuts use physical key positions, so they work on AZERTY keyboards without Shift.
 

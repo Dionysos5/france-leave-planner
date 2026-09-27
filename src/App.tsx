@@ -1,4 +1,5 @@
 import { IconButton } from '@components/ui/Button';
+import { Tooltip } from '@components/ui/Tooltip';
 import LeaveToolbar from '@features/calendar/components/LeaveToolbar';
 import MonthGrid from '@features/calendar/components/MonthGrid';
 import SettingsPanel from '@features/settings/components/SettingsPanel';
@@ -11,6 +12,31 @@ import {
   MousePointerClick,
   Settings as SettingsIcon,
 } from 'lucide-react';
+import type { ComponentProps } from 'react';
+
+interface BalanceCardProps extends ComponentProps<'div'> {
+  label: string;
+  value: number;
+  warning: string | null;
+}
+
+const BalanceCard = ({ label, value, warning, ...rest }: BalanceCardProps) => (
+  <div
+    {...rest}
+    className="relative bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm overflow-hidden"
+  >
+    <div className="flex items-center gap-2">
+      <span className="text-[9px] font-bold text-muted uppercase tracking-widest">{label}</span>
+      <span
+        className={`text-xs font-extrabold tabular-nums ${value < 0 ? 'text-red-500' : 'text-slate-800'}`}
+      >
+        {value.toFixed(1)}
+      </span>
+    </div>
+    {warning && <p className="text-[10px] font-bold text-amber-600">{warning}</p>}
+    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-400 to-violet-500" />
+  </div>
+);
 
 function App() {
   const { locale, translations } = useTranslation();
@@ -22,16 +48,16 @@ function App() {
     setSettings,
     uiPreferences,
     setUiPreferences,
-    monthlyBalances,
-    endBalance,
+    projection,
     handleToggleDay,
     handleRangeUpdate,
   } = useLeavePlan(calendar, activeTool);
 
-  const endMonthLabel = new Date(calendar.year, monthlyBalances.length - 1).toLocaleString(
-    locale === 'fr' ? 'fr-FR' : 'en-GB',
-    { month: 'short' }
-  );
+  const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-GB';
+  const endBalance = projection.months[11];
+  const endMonthLabel = new Date(calendar.year, 11).toLocaleString(dateLocale, { month: 'short' });
+  const formatDay = (year: number, month: number, day: number) =>
+    new Date(year, month, day).toLocaleString(dateLocale, { day: 'numeric', month: 'short' });
 
   return (
     <div className="min-h-screen pb-28">
@@ -64,29 +90,38 @@ function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm flex items-center gap-2 overflow-hidden">
-              <span className="text-[9px] font-bold text-muted uppercase tracking-widest">
-                {translations.cpBalance} · {endMonthLabel} {calendar.year}
-              </span>
-              <span
-                className={`text-xs font-extrabold tabular-nums ${endBalance.balanceCP < 0 ? 'text-red-500' : 'text-slate-800'}`}
-              >
-                {endBalance.balanceCP.toFixed(1)}
-              </span>
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-400 to-violet-500" />
-            </div>
+            <Tooltip
+              content={translations.cpBreakdown(
+                endBalance.cpPrevious.toFixed(1),
+                endBalance.cpCurrent.toFixed(1)
+              )}
+            >
+              <BalanceCard
+                label={`${translations.cpBalance} · ${endMonthLabel} ${calendar.year}`}
+                value={endBalance.cpPrevious + endBalance.cpCurrent}
+                warning={
+                  projection.cpLostOnMay31 > 0
+                    ? translations.lostOn(
+                        projection.cpLostOnMay31.toFixed(1),
+                        formatDay(calendar.year, 4, 31)
+                      )
+                    : null
+                }
+              />
+            </Tooltip>
 
-            <div className="relative bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm flex items-center gap-2 overflow-hidden">
-              <span className="text-[9px] font-bold text-muted uppercase tracking-widest">
-                {translations.rttBalance} · {endMonthLabel} {calendar.year}
-              </span>
-              <span
-                className={`text-xs font-extrabold tabular-nums ${endBalance.balanceRTT < 0 ? 'text-red-500' : 'text-slate-800'}`}
-              >
-                {endBalance.balanceRTT.toFixed(1)}
-              </span>
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-400 to-violet-500" />
-            </div>
+            <BalanceCard
+              label={`${translations.rttBalance} · ${endMonthLabel} ${calendar.year}`}
+              value={endBalance.rtt}
+              warning={
+                projection.rttLostOnDec31 > 0
+                  ? translations.lostOn(
+                      projection.rttLostOnDec31.toFixed(1),
+                      formatDay(calendar.year, 11, 31)
+                    )
+                  : null
+              }
+            />
 
             <IconButton
               label={translations.settingsTooltip}
@@ -137,6 +172,7 @@ function App() {
       />
 
       <SettingsPanel
+        calendar={calendar}
         settings={settings}
         onUpdate={setSettings}
         isOpen={isSettingsOpen}

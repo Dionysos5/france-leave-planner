@@ -26,9 +26,7 @@ describe('createRepository', () => {
     const state = createRepository(storageWith(blob)).load();
     expect(state.plan).toEqual({ '2026-07-14': 'CP' });
     expect(state.settings).toEqual({
-      accrualRateCP: 2.08,
-      accrualRateRTT: 0.75,
-      checkpoints: [{ dateStr: '2026-01-01', balanceCP: 12.5, balanceRTT: 4 }],
+      checkpoints: [{ dateStr: '2026-01-01', cpPrevious: 0, cpCurrent: 12.5, rtt: 4 }],
     });
   });
 
@@ -44,7 +42,7 @@ describe('createRepository', () => {
     expect(state.uiPreferences).toEqual({ hidePastMonths: true });
   });
 
-  test('v1 leaves array migrates through to v3', () => {
+  test('v1 leaves array migrates through to v4', () => {
     const blob = JSON.stringify({
       version: 1,
       leaves: [
@@ -59,10 +57,10 @@ describe('createRepository', () => {
     expect(state.plan).toEqual({ '2026-07-14': 'CP', '2026-07-15': 'CP' });
   });
 
-  test('v3 state loads as-is with invalid checkpoints dropped', () => {
+  test('v3 checkpoints migrate their single CP balance into CP N', () => {
     const blob = JSON.stringify({
       version: 3,
-      leaves: {},
+      leaves: { '2026-07-14': 'CP' },
       settings: {
         accrualRateCP: 2,
         accrualRateRTT: 1,
@@ -74,9 +72,34 @@ describe('createRepository', () => {
       uiPreferences: { hidePastMonths: false },
     });
     const state = createRepository(storageWith(blob)).load();
+    expect(state.plan).toEqual({ '2026-07-14': 'CP' });
+    expect(state.settings).toEqual({
+      checkpoints: [{ dateStr: '2026-08-01', cpPrevious: 0, cpCurrent: 10, rtt: 3 }],
+    });
+  });
+
+  test('v4 state loads as-is with invalid checkpoints dropped', () => {
+    const blob = JSON.stringify({
+      version: 4,
+      leaves: { '2026-07-15': 'SICK' },
+      settings: {
+        checkpoints: [
+          { dateStr: '2026-08-01', cpPrevious: 4, cpCurrent: 10, rtt: 3 },
+          { dateStr: 'not-a-date', cpPrevious: 5, cpCurrent: 0, rtt: 0 },
+        ],
+      },
+      uiPreferences: { hidePastMonths: false },
+    });
+    const state = createRepository(storageWith(blob)).load();
+    expect(state.plan).toEqual({ '2026-07-15': 'SICK' });
     expect(state.settings.checkpoints).toEqual([
-      { dateStr: '2026-08-01', balanceCP: 10, balanceRTT: 3 },
+      { dateStr: '2026-08-01', cpPrevious: 4, cpCurrent: 10, rtt: 3 },
     ]);
+  });
+
+  test('unknown versions yield defaults', () => {
+    const blob = JSON.stringify({ version: 99, leaves: { '2026-07-14': 'CP' } });
+    expect(createRepository(storageWith(blob)).load().plan).toEqual({});
   });
 
   test('saved plan survives a load round-trip', () => {
@@ -104,7 +127,7 @@ describe('createRepository', () => {
     });
   });
 
-  test('save writes a versioned v3 blob', () => {
+  test('save writes a versioned v4 blob', () => {
     const captured: { value: string | null } = { value: null };
     const storage = {
       getItem: () => null,
@@ -118,7 +141,7 @@ describe('createRepository', () => {
       uiPreferences: DEFAULT_UI_PREFS,
     });
     expect(JSON.parse(captured.value ?? '')).toEqual({
-      version: 3,
+      version: 4,
       leaves: { '2026-07-14': 'RTT' },
       settings: DEFAULT_SETTINGS,
       uiPreferences: DEFAULT_UI_PREFS,

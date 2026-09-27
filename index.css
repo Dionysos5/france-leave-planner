@@ -8,6 +8,8 @@
   --color-leave-rtt-hover: #9333ea;
   --color-leave-unpaid: #f97316;
   --color-leave-unpaid-hover: #ea580c;
+  --color-leave-sick: #14b8a6;
+  --color-leave-sick-hover: #0d9488;
 }
 
 body {

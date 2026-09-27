@@ -5,11 +5,13 @@ const TOOL_KEYS: Record<string, LeaveType | null> = {
   Digit1: LeaveType.CP,
   Digit2: LeaveType.RTT,
   Digit3: LeaveType.UNPAID,
-  Digit4: null,
+  Digit4: LeaveType.SICK,
+  Digit5: null,
   Numpad1: LeaveType.CP,
   Numpad2: LeaveType.RTT,
   Numpad3: LeaveType.UNPAID,
-  Numpad4: null,
+  Numpad4: LeaveType.SICK,
+  Numpad5: null,
 };
 
 export const toolForKey = (code: string): LeaveType | null | undefined => {

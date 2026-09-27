@@ -1,29 +1,31 @@
 import { NumberInput } from '@components/ui/NumberInput';
 import { SegmentedControl } from '@components/ui/SegmentedControl';
 import { SlideOver } from '@components/ui/SlideOver';
-import { type BalanceCheckpoint, formatDate, type LeaveSettings } from '@core';
+import {
+  type BalanceCheckpoint,
+  forfaitRestDays,
+  formatDate,
+  type LeaveSettings,
+  type YearCalendar,
+} from '@core';
 import { useTranslation } from '@i18n/LocaleContext';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface SettingsPanelProps {
+  calendar: YearCalendar;
   settings: LeaveSettings;
   onUpdate: (s: LeaveSettings) => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const inputClass =
-  'w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-slate-300 outline-none';
+const fieldClass =
+  'w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-slate-300';
 
-const compactInputClass =
-  'w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-2 text-xs font-bold text-slate-900 text-right outline-none focus:ring-2 focus:ring-slate-300';
+const BALANCE_FIELDS = ['cpPrevious', 'cpCurrent', 'rtt'] as const;
 
-const SettingsPanel = ({ settings, onUpdate, isOpen, onClose }: SettingsPanelProps) => {
+const SettingsPanel = ({ calendar, settings, onUpdate, isOpen, onClose }: SettingsPanelProps) => {
   const { locale, setLocale, translations } = useTranslation();
-
-  const handleChange = (field: 'accrualRateCP' | 'accrualRateRTT', value: number) => {
-    onUpdate({ ...settings, [field]: value });
-  };
 
   const updateCheckpoint = (index: number, patch: Partial<BalanceCheckpoint>) => {
     if (patch.dateStr !== undefined && !patch.dateStr) {
@@ -40,8 +42,9 @@ const SettingsPanel = ({ settings, onUpdate, isOpen, onClose }: SettingsPanelPro
   const addCheckpoint = () => {
     const checkpoint: BalanceCheckpoint = {
       dateStr: formatDate(new Date()),
-      balanceCP: 0,
-      balanceRTT: 0,
+      cpPrevious: 0,
+      cpCurrent: 0,
+      rtt: 0,
     };
     onUpdate({ ...settings, checkpoints: [...settings.checkpoints, checkpoint] });
   };
@@ -74,42 +77,52 @@ const SettingsPanel = ({ settings, onUpdate, isOpen, onClose }: SettingsPanelPro
       </div>
 
       <div>
-        <p className="text-[11px] font-black text-muted uppercase tracking-widest mb-4">
+        <p className="text-[11px] font-black text-muted uppercase tracking-widest mb-1">
           {translations.settings.balancesSection}
         </p>
-        <div className="space-y-2">
+        <p className="text-xs text-muted mb-4">{translations.settings.checkpointHint}</p>
+        <div className="space-y-3">
           {settings.checkpoints.map((checkpoint, index) => (
             <div
               key={checkpoint.dateStr}
-              className="grid grid-cols-[1fr_4rem_4rem_auto] gap-2 items-center"
+              className="space-y-2 rounded-md border border-slate-200 p-2"
             >
-              <input
-                type="date"
-                value={checkpoint.dateStr}
-                aria-label={translations.settings.asOf}
-                onChange={(e) => updateCheckpoint(index, { dateStr: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-slate-300"
-              />
-              <NumberInput
-                step="0.5"
-                className={compactInputClass}
-                value={checkpoint.balanceCP}
-                onValueChange={(val) => updateCheckpoint(index, { balanceCP: val })}
-              />
-              <NumberInput
-                step="0.5"
-                className={compactInputClass}
-                value={checkpoint.balanceRTT}
-                onValueChange={(val) => updateCheckpoint(index, { balanceRTT: val })}
-              />
-              <button
-                type="button"
-                onClick={() => removeCheckpoint(index)}
-                aria-label={translations.settings.removeCheckpoint}
-                className="w-7 h-7 flex cursor-pointer items-center justify-center rounded-md text-muted hover:text-red-500 hover:bg-slate-100 transition-colors"
-              >
-                <Trash2 size={14} />
-              </button>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={checkpoint.dateStr}
+                  aria-label={translations.settings.asOf}
+                  onChange={(e) => updateCheckpoint(index, { dateStr: e.target.value })}
+                  className={fieldClass}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeCheckpoint(index)}
+                  aria-label={translations.settings.removeCheckpoint}
+                  className="w-8 h-8 shrink-0 flex cursor-pointer items-center justify-center rounded-md text-muted hover:text-red-500 hover:bg-slate-100 transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {BALANCE_FIELDS.map((field) => (
+                  <div key={field}>
+                    <label
+                      htmlFor={`checkpoint-${index}-${field}`}
+                      className="block text-[10px] font-bold text-slate-500 mb-1"
+                    >
+                      {translations.settings[field]}
+                    </label>
+                    <NumberInput
+                      id={`checkpoint-${index}-${field}`}
+                      step="0.5"
+                      className={`${fieldClass} text-right`}
+                      value={checkpoint[field]}
+                      onValueChange={(val) => updateCheckpoint(index, { [field]: val })}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -125,39 +138,14 @@ const SettingsPanel = ({ settings, onUpdate, isOpen, onClose }: SettingsPanelPro
 
       <div>
         <p className="text-[11px] font-black text-muted uppercase tracking-widest mb-4">
-          {translations.settings.cpSection}
+          {translations.settings.rulesSection}
         </p>
-        <label htmlFor="accrualRateCP" className="block text-xs font-bold text-slate-500 mb-1.5">
-          {translations.settings.monthlyEarned}
-        </label>
-        <NumberInput
-          id="accrualRateCP"
-          step="0.01"
-          min={0}
-          className={inputClass}
-          value={settings.accrualRateCP}
-          onValueChange={(val) => handleChange('accrualRateCP', val)}
-        />
+        <ul className="list-disc space-y-1.5 pl-4 text-xs text-slate-600">
+          {translations.settings.rules(calendar.year, forfaitRestDays(calendar)).map((rule) => (
+            <li key={rule}>{rule}</li>
+          ))}
+        </ul>
       </div>
-
-      <div>
-        <p className="text-[11px] font-black text-muted uppercase tracking-widest mb-4">
-          {translations.settings.rttSection}
-        </p>
-        <label htmlFor="accrualRateRTT" className="block text-xs font-bold text-slate-500 mb-1.5">
-          {translations.settings.monthlyEarned}
-        </label>
-        <NumberInput
-          id="accrualRateRTT"
-          step="0.01"
-          min={0}
-          className={inputClass}
-          value={settings.accrualRateRTT}
-          onValueChange={(val) => handleChange('accrualRateRTT', val)}
-        />
-      </div>
-
-      <p className="text-xs text-muted italic">{translations.settings.unpaidNote}</p>
     </SlideOver>
   );
 };

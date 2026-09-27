@@ -1,11 +1,11 @@
+import { frenchCalendar } from '@constants';
 import {
   applyRange,
   applyToggle,
-  calculateMonthlyBalances,
   type LeaveSettings,
   type LeaveType,
-  type MonthBalance,
   type Plan,
+  projectYear,
   type YearCalendar,
 } from '@core';
 import type { UIPreferences } from '@shared/types';
@@ -21,14 +21,12 @@ export const useLeavePlan = (calendar: YearCalendar, activeTool: LeaveType | nul
   const [settings, setSettings] = useState<LeaveSettings>(persisted.settings);
   const [uiPreferences, setUiPreferences] = useState<UIPreferences>(persisted.uiPreferences);
 
-  const monthlyBalances = useMemo(
-    () => calculateMonthlyBalances(calendar, plan, settings),
+  const projection = useMemo(
+    () =>
+      projectYear(calendar.year, plan, settings, (year) =>
+        year === calendar.year ? calendar : frenchCalendar(year)
+      ),
     [calendar, plan, settings]
-  );
-
-  const endBalance = useMemo<MonthBalance>(
-    () => monthlyBalances.at(-1) ?? { balanceCP: 0, balanceRTT: 0 },
-    [monthlyBalances]
   );
 
   useEffect(() => {
@@ -55,8 +53,7 @@ export const useLeavePlan = (calendar: YearCalendar, activeTool: LeaveType | nul
     setSettings,
     uiPreferences,
     setUiPreferences,
-    monthlyBalances,
-    endBalance,
+    projection,
     handleToggleDay,
     handleRangeUpdate,
   };

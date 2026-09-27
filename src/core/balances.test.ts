@@ -1,117 +1,117 @@
 import { describe, expect, test } from 'bun:test';
-import { calculateMonthlyBalances } from './balances';
+import { projectYear } from './balances';
 import { buildYearCalendar } from './calendar';
-import { type LeaveSettings, LeaveType } from './types';
+import { CP_PER_MONTH, FORFAIT_DAYS } from './rules';
+import { type BalanceCheckpoint, LeaveType, type Plan } from './types';
 
-const { CP, UNPAID } = LeaveType;
+const { CP, RTT, UNPAID, SICK } = LeaveType;
 
-const SETTINGS: LeaveSettings = {
-  accrualRateCP: 2,
-  accrualRateRTT: 1,
-  checkpoints: [{ dateStr: '2024-01-01', balanceCP: 10, balanceRTT: 5 }],
-};
+// Without public holidays, 2024 has 262 weekdays (19 RTT) and 2023 has 260 (17 RTT).
+const NO_HOLIDAYS = (year: number) => buildYearCalendar(year, []);
+const RTT_2024 = 19;
+const JANUARY_2024_WEEKDAYS = 23;
 
-const CALENDAR_2024 = buildYearCalendar(2024, []);
+const project = (year: number, plan: Plan, checkpoints: BalanceCheckpoint[] = []) =>
+  projectYear(year, plan, { checkpoints }, NO_HOLIDAYS);
 
-describe('calculateMonthlyBalances', () => {
-  test('accrues monthly from the seeded balance', () => {
-    const balances = calculateMonthlyBalances(CALENDAR_2024, {}, SETTINGS);
-    expect(balances).toHaveLength(12);
-    expect(balances[0]).toEqual({ balanceCP: 12, balanceRTT: 6 });
-    expect(balances[1]).toEqual({ balanceCP: 14, balanceRTT: 7 });
+const checkpoint = (dateStr: string, cpPrevious: number, cpCurrent: number, rtt: number) => ({
+  dateStr,
+  cpPrevious,
+  cpCurrent,
+  rtt,
+});
+
+describe('projectYear', () => {
+  test('without checkpoints CP starts from zero and RTT is granted on January 1', () => {
+    const { months } = project(2024, {});
+    expect(months).toHaveLength(12);
+    expect(months[0].cpPrevious).toBe(0);
+    expect(months[0].cpCurrent).toBeCloseTo(CP_PER_MONTH, 3);
+    expect(months[0].rtt).toBe(RTT_2024);
   });
 
-  test('CP usage subtracts on top of accrual', () => {
-    const balances = calculateMonthlyBalances(CALENDAR_2024, { '2024-01-02': CP }, SETTINGS);
-    expect(balances[0]).toEqual({ balanceCP: 11, balanceRTT: 6 });
+  test('CP N rolls into CP N-1 on June 1', () => {
+    const { months } = project(2024, {});
+    expect(months[4].cpCurrent).toBeCloseTo(5 * CP_PER_MONTH, 3);
+    expect(months[5].cpPrevious).toBeCloseTo(5 * CP_PER_MONTH, 3);
+    expect(months[5].cpCurrent).toBeCloseTo(CP_PER_MONTH, 3);
   });
 
-  test('leaves on weekends and holidays are ignored', () => {
-    const balances = calculateMonthlyBalances(
-      CALENDAR_2024,
-      { '2024-01-06': CP, '2024-01-07': CP },
-      SETTINGS
+  test('a full year earns 25 CP', () => {
+    const { months } = project(2024, {});
+    expect(months[11].cpPrevious + months[11].cpCurrent).toBeCloseTo(25, 3);
+  });
+
+  test('CP is taken from N-1 first, then from N', () => {
+    const { months } = project(2024, { '2024-01-02': CP }, [checkpoint('2024-01-01', 0.5, 5, 0)]);
+    expect(months[0].cpPrevious).toBe(0);
+    expect(months[0].cpCurrent).toBeCloseTo(4.5 + CP_PER_MONTH, 3);
+  });
+
+  test('CP N-1 left on May 31 is lost', () => {
+    const { months, cpLostOnMay31 } = project(2024, {}, [checkpoint('2024-01-01', 3, 0, 0)]);
+    expect(cpLostOnMay31).toBe(3);
+    expect(months[5].cpPrevious).toBeCloseTo(5 * CP_PER_MONTH, 3);
+  });
+
+  test('balances carry over from a checkpoint in a previous year', () => {
+    const { months } = project(2024, {}, [checkpoint('2023-06-01', 10, 0, 5)]);
+    expect(months[0].cpPrevious).toBe(10);
+    expect(months[0].cpCurrent).toBeCloseTo(8 * CP_PER_MONTH, 3);
+    expect(months[0].rtt).toBe(RTT_2024);
+  });
+
+  test('RTT left on December 31 is lost', () => {
+    const { rttLostOnDec31 } = project(2023, {}, [checkpoint('2023-06-01', 0, 0, 5)]);
+    expect(rttLostOnDec31).toBe(5);
+  });
+
+  test('an RTT day uses one RTT', () => {
+    const { months, rttLostOnDec31 } = project(2024, { '2024-01-02': RTT });
+    expect(months[0].rtt).toBe(RTT_2024 - 1);
+    expect(rttLostOnDec31).toBe(RTT_2024 - 1);
+  });
+
+  test('leave on weekends is ignored', () => {
+    const { months } = project(2024, { '2024-01-06': CP, '2024-01-07': RTT });
+    expect(months[0].cpCurrent).toBeCloseTo(CP_PER_MONTH, 3);
+    expect(months[0].rtt).toBe(RTT_2024);
+  });
+
+  test('unpaid leave reduces CP accrual and RTT in proportion', () => {
+    const { months } = project(2024, { '2024-01-02': UNPAID });
+    expect(months[0].cpCurrent).toBeCloseTo(
+      (CP_PER_MONTH * (JANUARY_2024_WEEKDAYS - 1)) / JANUARY_2024_WEEKDAYS,
+      3
     );
-    expect(balances[0]).toEqual({ balanceCP: 12, balanceRTT: 6 });
+    expect(months[0].rtt).toBeCloseTo(RTT_2024 - RTT_2024 / (FORFAIT_DAYS + RTT_2024), 3);
   });
 
-  test('balances are cumulative across the year', () => {
-    const balances = calculateMonthlyBalances(CALENDAR_2024, { '2024-01-02': CP }, SETTINGS);
-    expect(balances[11]).toEqual({ balanceCP: 33, balanceRTT: 17 });
-  });
-
-  test('unpaid leave slows accrual through the work ratio', () => {
-    const balances = calculateMonthlyBalances(CALENDAR_2024, { '2024-01-02': UNPAID }, SETTINGS);
-    expect(balances[0].balanceCP).toBeCloseTo(10 + (2 * 22) / 23, 3);
-    expect(balances[0].balanceRTT).toBeCloseTo(5 + (1 * 22) / 23, 3);
-  });
-
-  test('without checkpoints the year starts from zero', () => {
-    const balances = calculateMonthlyBalances(
-      CALENDAR_2024,
-      {},
-      {
-        accrualRateCP: 2,
-        accrualRateRTT: 1,
-        checkpoints: [],
-      }
+  test('sick leave earns 80% of CP and leaves RTT untouched', () => {
+    const { months } = project(2024, { '2024-01-02': SICK });
+    expect(months[0].cpCurrent).toBeCloseTo(
+      (CP_PER_MONTH * (JANUARY_2024_WEEKDAYS - 0.2)) / JANUARY_2024_WEEKDAYS,
+      3
     );
-    expect(balances[0]).toEqual({ balanceCP: 2, balanceRTT: 1 });
+    expect(months[0].rtt).toBe(RTT_2024);
   });
 
-  test('a checkpoint resets the running balance mid-year', () => {
-    const settings: LeaveSettings = {
-      accrualRateCP: 2,
-      accrualRateRTT: 1,
-      checkpoints: [{ dateStr: '2024-06-01', balanceCP: 20, balanceRTT: 9 }],
-    };
-    const balances = calculateMonthlyBalances(CALENDAR_2024, {}, settings);
-    expect(balances[4]).toEqual({ balanceCP: 10, balanceRTT: 5 });
-    expect(balances[5]).toEqual({ balanceCP: 22, balanceRTT: 10 });
+  test('a checkpoint resets the running balances mid-year', () => {
+    const { months } = project(2024, { '2024-01-02': CP }, [checkpoint('2024-03-01', 2, 7, 4)]);
+    expect(months[2]).toEqual({
+      cpPrevious: 2,
+      cpCurrent: Number((7 + CP_PER_MONTH).toFixed(3)),
+      rtt: 4,
+    });
   });
 
-  test('usage before a checkpoint is wiped by the reset', () => {
-    const settings: LeaveSettings = {
-      accrualRateCP: 2,
-      accrualRateRTT: 1,
-      checkpoints: [{ dateStr: '2024-06-01', balanceCP: 20, balanceRTT: 9 }],
-    };
-    const balances = calculateMonthlyBalances(CALENDAR_2024, { '2024-01-02': CP }, settings);
-    expect(balances[4]).toEqual({ balanceCP: 9, balanceRTT: 5 });
-    expect(balances[5]).toEqual({ balanceCP: 22, balanceRTT: 10 });
+  test('a checkpoint on the last day of a month already includes that month accrual', () => {
+    const { months } = project(2024, {}, [checkpoint('2024-08-31', 6.5, 1, 0.5)]);
+    expect(months[7]).toEqual({ cpPrevious: 6.5, cpCurrent: 1, rtt: 0.5 });
   });
 
-  test('a checkpoint on the last day of a month absorbs that month accrual', () => {
-    const settings: LeaveSettings = {
-      accrualRateCP: 2,
-      accrualRateRTT: 1,
-      checkpoints: [{ dateStr: '2024-08-31', balanceCP: 6.5, balanceRTT: 0.5 }],
-    };
-    const balances = calculateMonthlyBalances(CALENDAR_2024, {}, settings);
-    expect(balances[7]).toEqual({ balanceCP: 6.5, balanceRTT: 0.5 });
-    expect(balances[8]).toEqual({ balanceCP: 8.5, balanceRTT: 1.5 });
-  });
-
-  test('a checkpoint from a previous year seeds the opening balance', () => {
-    const settings: LeaveSettings = {
-      accrualRateCP: 2,
-      accrualRateRTT: 1,
-      checkpoints: [{ dateStr: '2023-08-01', balanceCP: 30, balanceRTT: 7 }],
-    };
-    const balances = calculateMonthlyBalances(CALENDAR_2024, {}, settings);
-    expect(balances[0]).toEqual({ balanceCP: 32, balanceRTT: 8 });
-  });
-
-  test('an in-year checkpoint overrides a previous-year seed', () => {
-    const settings: LeaveSettings = {
-      accrualRateCP: 2,
-      accrualRateRTT: 1,
-      checkpoints: [
-        { dateStr: '2023-08-01', balanceCP: 30, balanceRTT: 7 },
-        { dateStr: '2024-01-01', balanceCP: 10, balanceRTT: 5 },
-      ],
-    };
-    const balances = calculateMonthlyBalances(CALENDAR_2024, {}, settings);
-    expect(balances[0]).toEqual({ balanceCP: 12, balanceRTT: 6 });
+  test('checkpoints after the projected year are ignored', () => {
+    const { months } = project(2024, {}, [checkpoint('2025-03-01', 9, 9, 9)]);
+    expect(months[0].rtt).toBe(RTT_2024);
   });
 });

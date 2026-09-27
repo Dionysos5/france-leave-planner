@@ -7,15 +7,16 @@ describe('toolForKey', () => {
     expect(toolForKey('Digit1')).toBe(LeaveType.CP);
     expect(toolForKey('Digit2')).toBe(LeaveType.RTT);
     expect(toolForKey('Digit3')).toBe(LeaveType.UNPAID);
+    expect(toolForKey('Digit4')).toBe(LeaveType.SICK);
   });
 
-  test('4 selects the eraser', () => {
-    expect(toolForKey('Digit4')).toBe(null);
+  test('5 selects the eraser', () => {
+    expect(toolForKey('Digit5')).toBe(null);
   });
 
   test('numpad keys work too', () => {
     expect(toolForKey('Numpad1')).toBe(LeaveType.CP);
-    expect(toolForKey('Numpad4')).toBe(null);
+    expect(toolForKey('Numpad5')).toBe(null);
   });
 
   test('unknown keys are no-ops', () => {
@@ -29,6 +30,7 @@ describe('displayKeyForTool', () => {
     expect(displayKeyForTool(LeaveType.CP)).toBe('1');
     expect(displayKeyForTool(LeaveType.RTT)).toBe('2');
     expect(displayKeyForTool(LeaveType.UNPAID)).toBe('3');
-    expect(displayKeyForTool(null)).toBe('4');
+    expect(displayKeyForTool(LeaveType.SICK)).toBe('4');
+    expect(displayKeyForTool(null)).toBe('5');
   });
 });

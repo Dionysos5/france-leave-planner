@@ -1,4 +1,4 @@
-import type { PublicHoliday } from '@core';
+import { buildYearCalendar, type PublicHoliday, type YearCalendar } from '@core';
 import { addDays, format } from 'date-fns';
 
 const DATE_FORMAT = 'yyyy-MM-dd';
@@ -53,4 +53,8 @@ export const getPublicHolidays = (year: number): PublicHoliday[] => {
   return [...fixed, ...easterDerived]
     .map(({ date, name }) => ({ dateStr: format(date, DATE_FORMAT), name }))
     .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+};
+
+export const frenchCalendar = (year: number): YearCalendar => {
+  return buildYearCalendar(year, getPublicHolidays(year));
 };

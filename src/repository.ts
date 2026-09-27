@@ -15,9 +15,7 @@ export interface LeaveRepository {
 
 interface SettingsV2 {
   initialCP: number;
-  accrualRateCP: number;
   initialRTT: number;
-  accrualRateRTT: number;
 }
 
 const EMPTY_STATE: PersistedState = {
@@ -66,7 +64,10 @@ const sanitizePlan = (value: unknown): Plan => {
   return plan;
 };
 
-const sanitizeCheckpoints = (value: unknown): BalanceCheckpoint[] => {
+const sanitizeCheckpoints = (
+  value: unknown,
+  toCheckpoint: (entry: Record<string, unknown>, dateStr: string) => BalanceCheckpoint
+): BalanceCheckpoint[] => {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -75,13 +76,9 @@ const sanitizeCheckpoints = (value: unknown): BalanceCheckpoint[] => {
     if (!entry || typeof entry !== 'object') {
       continue;
     }
-    const c = entry as Partial<BalanceCheckpoint>;
+    const c = entry as Record<string, unknown>;
     if (isDateStr(c.dateStr)) {
-      checkpoints.push({
-        dateStr: c.dateStr,
-        balanceCP: finiteOr(c.balanceCP, 0),
-        balanceRTT: finiteOr(c.balanceRTT, 0),
-      });
+      checkpoints.push(toCheckpoint(c, c.dateStr));
     }
   }
   return checkpoints;
@@ -91,43 +88,52 @@ const sanitizeSettings = (value: unknown): LeaveSettings => {
   if (!value || typeof value !== 'object') {
     return DEFAULT_SETTINGS;
   }
-  const s = value as Partial<LeaveSettings>;
+  const s = value as { checkpoints?: unknown };
   return {
-    accrualRateCP: finiteOr(s.accrualRateCP, DEFAULT_SETTINGS.accrualRateCP),
-    accrualRateRTT: finiteOr(s.accrualRateRTT, DEFAULT_SETTINGS.accrualRateRTT),
-    checkpoints: sanitizeCheckpoints(s.checkpoints),
+    checkpoints: sanitizeCheckpoints(s.checkpoints, (c, dateStr) => ({
+      dateStr,
+      cpPrevious: finiteOr(c.cpPrevious, 0),
+      cpCurrent: finiteOr(c.cpCurrent, 0),
+      rtt: finiteOr(c.rtt, 0),
+    })),
+  };
+};
+
+// v3 kept a single CP balance; which reference period it came from is unknown, so it lands in
+// CP N, which never expires before the next May 31.
+const upgradeSettingsV3toV4 = (value: unknown): LeaveSettings => {
+  if (!value || typeof value !== 'object') {
+    return DEFAULT_SETTINGS;
+  }
+  const s = value as { checkpoints?: unknown };
+  return {
+    checkpoints: sanitizeCheckpoints(s.checkpoints, (c, dateStr) => ({
+      dateStr,
+      cpPrevious: 0,
+      cpCurrent: finiteOr(c.balanceCP, 0),
+      rtt: finiteOr(c.balanceRTT, 0),
+    })),
   };
 };
 
 const sanitizeSettingsV2 = (value: unknown): SettingsV2 => {
   if (!value || typeof value !== 'object') {
-    return {
-      initialCP: 0,
-      accrualRateCP: DEFAULT_SETTINGS.accrualRateCP,
-      initialRTT: 0,
-      accrualRateRTT: DEFAULT_SETTINGS.accrualRateRTT,
-    };
+    return { initialCP: 0, initialRTT: 0 };
   }
   const s = value as Partial<SettingsV2>;
   return {
     initialCP: finiteOr(s.initialCP, 0),
-    accrualRateCP: finiteOr(s.accrualRateCP, DEFAULT_SETTINGS.accrualRateCP),
     initialRTT: finiteOr(s.initialRTT, 0),
-    accrualRateRTT: finiteOr(s.accrualRateRTT, DEFAULT_SETTINGS.accrualRateRTT),
   };
 };
 
-const upgradeSettingsV2toV3 = (value: unknown): LeaveSettings => {
+const upgradeSettingsV2toV4 = (value: unknown): LeaveSettings => {
   const s = sanitizeSettingsV2(value);
   const checkpoints: BalanceCheckpoint[] =
     s.initialCP !== 0 || s.initialRTT !== 0
-      ? [{ dateStr: '2026-01-01', balanceCP: s.initialCP, balanceRTT: s.initialRTT }]
+      ? [{ dateStr: '2026-01-01', cpPrevious: 0, cpCurrent: s.initialCP, rtt: s.initialRTT }]
       : [];
-  return {
-    accrualRateCP: s.accrualRateCP,
-    accrualRateRTT: s.accrualRateRTT,
-    checkpoints,
-  };
+  return { checkpoints };
 };
 
 const sanitizeUiPreferences = (value: unknown): UIPreferences => {
@@ -140,18 +146,6 @@ const sanitizeUiPreferences = (value: unknown): UIPreferences => {
       typeof prefs.hidePastMonths === 'boolean'
         ? prefs.hidePastMonths
         : DEFAULT_UI_PREFS.hidePastMonths,
-  };
-};
-
-const sanitizeState = (value: unknown): PersistedState => {
-  if (!value || typeof value !== 'object') {
-    return EMPTY_STATE;
-  }
-  const state = value as { leaves?: unknown; settings?: unknown; uiPreferences?: unknown };
-  return {
-    plan: sanitizePlan(state.leaves),
-    settings: sanitizeSettings(state.settings),
-    uiPreferences: sanitizeUiPreferences(state.uiPreferences),
   };
 };
 
@@ -191,17 +185,20 @@ export const createRepository = (
         settings?: unknown;
         uiPreferences?: unknown;
       };
-      if (version === STORAGE_VERSION) {
-        return sanitizeState(parsed);
+      const upgradeSettings: Record<number, (value: unknown) => LeaveSettings> = {
+        1: upgradeSettingsV2toV4,
+        2: upgradeSettingsV2toV4,
+        3: upgradeSettingsV3toV4,
+        [STORAGE_VERSION]: sanitizeSettings,
+      };
+      if (typeof version !== 'number' || !upgradeSettings[version]) {
+        return EMPTY_STATE;
       }
-      if (version === 1 || version === 2) {
-        return {
-          plan: version === 1 ? planFromV1Leaves(leaves) : sanitizePlan(leaves),
-          settings: upgradeSettingsV2toV3(settings),
-          uiPreferences: sanitizeUiPreferences(uiPreferences),
-        };
-      }
-      return EMPTY_STATE;
+      return {
+        plan: version === 1 ? planFromV1Leaves(leaves) : sanitizePlan(leaves),
+        settings: upgradeSettings[version](settings),
+        uiPreferences: sanitizeUiPreferences(uiPreferences),
+      };
     } catch {
       return EMPTY_STATE;
     }
