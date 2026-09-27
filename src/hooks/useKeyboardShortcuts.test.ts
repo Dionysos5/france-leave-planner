@@ -10,17 +10,17 @@ describe('toolForKey', () => {
     expect(toolForKey('Digit4')).toBe(DayType.SICK);
   });
 
-  test('5 selects the eraser', () => {
-    expect(toolForKey('Digit5')).toBe(null);
+  test('5 selects work from home', () => {
+    expect(toolForKey('Digit5')).toBe(DayType.WFH);
   });
 
-  test('6 selects work from home', () => {
-    expect(toolForKey('Digit6')).toBe(DayType.WFH);
+  test('6 selects the eraser', () => {
+    expect(toolForKey('Digit6')).toBe(null);
   });
 
   test('numpad keys work too', () => {
     expect(toolForKey('Numpad1')).toBe(DayType.CP);
-    expect(toolForKey('Numpad5')).toBe(null);
+    expect(toolForKey('Numpad6')).toBe(null);
   });
 
   test('unknown keys are no-ops', () => {
@@ -35,7 +35,8 @@ describe('displayKeyForTool', () => {
     expect(displayKeyForTool(DayType.RTT)).toBe('2');
     expect(displayKeyForTool(DayType.UNPAID)).toBe('3');
     expect(displayKeyForTool(DayType.SICK)).toBe('4');
-    expect(displayKeyForTool(null)).toBe('5');
+    expect(displayKeyForTool(DayType.WFH)).toBe('5');
+    expect(displayKeyForTool(null)).toBe('6');
   });
 });
 

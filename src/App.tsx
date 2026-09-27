@@ -34,7 +34,7 @@ function App() {
   const { selection, pressDay } = usePaintSelection(calendar, handleToggleDay, handleRangeUpdate);
 
   return (
-    <div className="min-h-screen pb-28">
+    <div className="min-h-screen pb-32">
       <header className="px-4 pt-4 pb-2 md:px-6 md:pt-8 md:pb-4 max-w-7xl mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-3 md:flex-none">
@@ -59,6 +59,11 @@ function App() {
                 >
                   <ChevronRight size={13} />
                 </IconButton>
+                <HidePastToggle
+                  uiPreferences={uiPreferences}
+                  setUiPreferences={setUiPreferences}
+                  className="ml-1 w-8 h-8 md:w-6 md:h-6 rounded"
+                />
               </div>
             </div>
           </div>
@@ -68,21 +73,14 @@ function App() {
             <BalanceSummary year={calendar.year} projection={projection} />
           </div>
 
-          <div className="flex items-center gap-2">
-            <HidePastToggle
-              uiPreferences={uiPreferences}
-              setUiPreferences={setUiPreferences}
-              className="w-10 h-10 rounded-full sm:hidden"
-            />
-            <IconButton
-              label={translations.settingsTooltip}
-              variant="outline"
-              className="w-10 h-10 rounded-full shadow-sm"
-              onClick={() => setIsSettingsOpen(true)}
-            >
-              <SettingsIcon size={18} />
-            </IconButton>
-          </div>
+          <IconButton
+            label={translations.settingsTooltip}
+            variant="outline"
+            className="w-10 h-10 rounded-full shadow-sm"
+            onClick={() => setIsSettingsOpen(true)}
+          >
+            <SettingsIcon size={18} />
+          </IconButton>
         </div>
       </header>
 
@@ -115,12 +113,7 @@ function App() {
         </div>
       </main>
 
-      <LeaveToolbar
-        activeTool={activeTool}
-        setActiveTool={setActiveTool}
-        uiPreferences={uiPreferences}
-        setUiPreferences={setUiPreferences}
-      />
+      <LeaveToolbar activeTool={activeTool} setActiveTool={setActiveTool} />
 
       <SettingsPanel
         calendar={calendar}

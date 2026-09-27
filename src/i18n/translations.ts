@@ -46,7 +46,7 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     rttNotCovered: (days) => `${days} more than the year earns`,
     cpBreakdown: (previous, current) => `CP N-1: ${previous} · CP N: ${current}`,
     lostOn: (days, date) => `${days} lost ${date}`,
-    firstRunHint: 'Click or drag days to paint your leave — 1–5 switch tools.',
+    firstRunHint: 'Click or drag days to paint your leave — 1–6 switch tools.',
     firstRunHintTouch: 'Tap a day to paint it, or long-press and drag to paint a range.',
     previousYear: 'Previous year',
     nextYear: 'Next year',
@@ -94,7 +94,7 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     cpBreakdown: (previous, current) => `CP N-1 : ${previous} · CP N : ${current}`,
     lostOn: (days, date) => `${days} perdus le ${date}`,
     firstRunHint:
-      "Cliquez ou glissez sur les jours pour poser vos congés — 1 à 5 pour changer d'outil.",
+      "Cliquez ou glissez sur les jours pour poser vos congés — 1 à 6 pour changer d'outil.",
     firstRunHintTouch:
       'Touchez un jour pour le poser, ou appuyez longuement puis glissez pour une période.',
     previousYear: 'Année précédente',

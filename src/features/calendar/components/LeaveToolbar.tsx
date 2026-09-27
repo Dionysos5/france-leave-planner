@@ -1,98 +1,96 @@
 import { Button } from '@components/ui/Button';
 import { Kbd } from '@components/ui/Kbd';
+import { Tooltip } from '@components/ui/Tooltip';
 import { DAY_TYPES } from '@constants';
 import { DayType } from '@core';
 import { displayKeyForTool } from '@hooks/useKeyboardShortcuts';
 import { useTranslation } from '@i18n/LocaleContext';
-import type { UIPreferences } from '@shared/types';
-import { Eraser } from 'lucide-react';
+import { Eraser, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { HidePastToggle } from './HidePastToggle';
 
-const LEAVE_TOOLS = Object.values(DayType).filter((type) => DAY_TYPES[type].isLeave);
-const OTHER_TOOLS = Object.values(DayType).filter((type) => !DAY_TYPES[type].isLeave);
+const ERASER_ACTIVE_CLASS = 'bg-slate-200 text-slate-900 hover:bg-slate-300';
 
 interface LeaveToolbarProps {
   activeTool: DayType | null;
   setActiveTool: (tool: DayType | null) => void;
-  uiPreferences: UIPreferences;
-  setUiPreferences: (prefs: UIPreferences) => void;
 }
 
-const Divider = () => <div className="w-px h-5 shrink-0 bg-slate-200 mx-0.5 sm:mx-1" />;
+/** A small square in the day's color; on a selected button it gets a white outline. */
+const Swatch = ({
+  className,
+  icon: Icon,
+  onColor,
+}: {
+  className: string;
+  icon?: LucideIcon;
+  onColor: boolean;
+}) => (
+  <span
+    className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] ${className} ${onColor ? 'ring-1 ring-inset ring-white/80' : ''}`}
+  >
+    {Icon && <Icon size={9} strokeWidth={2.5} aria-hidden />}
+  </span>
+);
 
-const LeaveToolbar = ({
-  activeTool,
-  setActiveTool,
-  uiPreferences,
-  setUiPreferences,
-}: LeaveToolbarProps) => {
+const LeaveToolbar = ({ activeTool, setActiveTool }: LeaveToolbarProps) => {
   const { locale, translations } = useTranslation();
 
-  // Phones only have room for one label: inactive tools show just their swatch.
+  // The selected tool takes the color it paints. Phones only have room for its label.
   const toolButton = (
     tool: DayType | null,
     swatch: ReactNode,
     label: string,
-    phoneLabel: string
+    shortLabel: string,
+    activeClass: string
   ) => {
     const active = activeTool === tool;
     return (
-      <Button
+      <Tooltip
         key={tool ?? 'eraser'}
-        variant={active ? 'solid' : 'ghost'}
-        aria-pressed={active}
-        aria-label={label}
-        className="shrink-0"
-        onClick={() => setActiveTool(tool)}
+        content={
+          <span className="flex items-center gap-1.5">
+            {label}
+            <Kbd tone="dark">{displayKeyForTool(tool)}</Kbd>
+          </span>
+        }
       >
-        {swatch}
-        {active && <span className="sm:hidden">{phoneLabel}</span>}
-        <span className="hidden sm:inline">{label}</span>
-        <span className="hidden sm:contents">
-          <Kbd tone={active ? 'dark' : 'light'}>{displayKeyForTool(tool)}</Kbd>
-        </span>
-      </Button>
-    );
-  };
-
-  const dayTypeButton = (type: DayType) => {
-    const { swatch, label, shortLabel } = DAY_TYPES[type];
-    return toolButton(
-      type,
-      'icon' in swatch ? (
-        <swatch.icon
-          size={14}
-          aria-hidden
-          className={activeTool === type ? undefined : swatch.iconClass}
-        />
-      ) : (
-        <span className={`w-2.5 h-2.5 rounded-sm ${swatch.dotClass}`} />
-      ),
-      label[locale],
-      (shortLabel ?? label)[locale]
+        <Button
+          variant={active ? 'plain' : 'ghost'}
+          aria-pressed={active}
+          aria-label={label}
+          className={`shrink-0 ${active ? activeClass : ''}`}
+          onClick={() => setActiveTool(tool)}
+        >
+          {swatch}
+          <span className={active ? undefined : 'hidden sm:inline'}>{shortLabel}</span>
+        </Button>
+      </Tooltip>
     );
   };
 
   return (
-    <div className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] md:bottom-10 z-50 flex justify-center pointer-events-none">
-      <div className="pointer-events-auto max-w-full overflow-x-auto bg-white/90 backdrop-blur-sm border border-slate-200 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] rounded-xl p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1">
-        {LEAVE_TOOLS.map(dayTypeButton)}
-        <Divider />
+    <div className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] md:bottom-8 z-50 flex justify-center pointer-events-none">
+      <div className="pointer-events-auto max-w-full overflow-x-auto bg-white border border-slate-200 shadow-[0_8px_24px_-8px_rgba(15,23,42,0.25)] rounded-2xl p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1">
+        {Object.values(DayType).map((type) => {
+          const { label, shortLabel, activeClass, swatchClass, icon } = DAY_TYPES[type];
+          return toolButton(
+            type,
+            <Swatch className={swatchClass} icon={icon} onColor={activeTool === type && !icon} />,
+            label[locale],
+            shortLabel[locale],
+            activeClass
+          );
+        })}
+
+        <div className="w-px h-5 shrink-0 bg-slate-200 mx-0.5" />
+
         {toolButton(
           null,
           <Eraser size={14} aria-hidden />,
           translations.eraser,
-          translations.eraser
+          translations.eraser,
+          ERASER_ACTIVE_CLASS
         )}
-        <Divider />
-        {OTHER_TOOLS.map(dayTypeButton)}
-
-        {/* On phones the toggle lives in the header to leave room for the tools. */}
-        <div className="hidden sm:contents">
-          <Divider />
-          <HidePastToggle uiPreferences={uiPreferences} setUiPreferences={setUiPreferences} />
-        </div>
       </div>
     </div>
   );

@@ -54,8 +54,7 @@ const MonthGrid = ({
 
     const previewing = selection.has(dateStr) && !isWknd && !holiday;
     const shownType = previewing ? activeTool : dayType;
-    const swatch = shownType ? DAY_TYPES[shownType].swatch : null;
-    const DayIcon = swatch && 'icon' in swatch ? swatch.icon : null;
+    const DayIcon = shownType ? DAY_TYPES[shownType].icon : undefined;
 
     let bgClass = 'bg-white hover:bg-slate-50';
     let textClass = 'text-slate-700';

@@ -1,11 +1,13 @@
 import type { ButtonHTMLAttributes } from 'react';
 
-type Variant = 'ghost' | 'solid' | 'outline';
+type Variant = 'ghost' | 'solid' | 'outline' | 'plain';
 
 const VARIANT_CLASSES: Record<Variant, string> = {
   ghost: 'text-slate-500 hover:bg-slate-50 hover:text-slate-900',
   solid: 'bg-slate-900 text-white hover:bg-slate-700',
   outline: 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50',
+  // Colors come from the caller's className.
+  plain: '',
 };
 
 const FOCUS_CLASSES =

@@ -22,8 +22,8 @@ Built for one profile: a **cadre au forfait jours (218 days) under the Syntec ag
 | 2 | RTT tool |
 | 3 | Unpaid tool |
 | 4 | Sick tool |
-| 5 | Eraser |
-| 6 | Work from home |
+| 5 | Work from home |
+| 6 | Eraser |
 
 Shortcuts use physical key positions, so they work on AZERTY keyboards without Shift.
 
