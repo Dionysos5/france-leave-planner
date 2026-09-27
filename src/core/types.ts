@@ -5,6 +5,7 @@ export const LeaveType = {
   RTT: 'RTT',
   UNPAID: 'UNPAID',
   SICK: 'SICK',
+  WFH: 'WFH',
 } as const;
 export type LeaveType = (typeof LeaveType)[keyof typeof LeaveType];
 

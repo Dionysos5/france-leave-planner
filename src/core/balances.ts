@@ -102,6 +102,9 @@ export const projectYear = (
           case LeaveType.SICK:
             sickDays += 1;
             break;
+          case LeaveType.WFH:
+            // Working from home is a worked day: nothing to deduct, full accrual.
+            break;
         }
       }
 

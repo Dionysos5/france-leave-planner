@@ -1,46 +1,62 @@
 import { LeaveType } from '@core';
 import type { Locale } from '@shared/types';
+import { House, type LucideIcon } from 'lucide-react';
 
 interface LeaveTypeDescriptor {
   /** Number key that selects the tool (top row or numpad). */
   shortcut: string;
   label: Record<Locale, string>;
-  /** Label for narrow screens. */
-  shortLabel: Record<Locale, string>;
-  /** Classes for a painted day; the colors are defined in index.css. */
+  /** Label for narrow screens; without one the tool shows only its icon there. */
+  shortLabel?: Record<Locale, string>;
+  /** Classes for a painted day: background, text and border. Colors are defined in index.css. */
   cellClass: string;
-  dotClass: string;
+  /** Toolbar swatch: a colored dot, or an icon that is also drawn on painted days. */
+  swatch: { dotClass: string } | { icon: LucideIcon };
+  /** Leave tools sit before the eraser in the toolbar, the others after it. */
+  isLeave: boolean;
 }
 
-/** Everything the UI needs per leave type; adding a type means adding one entry here. */
+/** Everything the UI needs per day type; adding a type means adding one entry here. */
 export const LEAVE_TYPES: Record<LeaveType, LeaveTypeDescriptor> = {
   [LeaveType.CP]: {
     shortcut: '1',
     label: { en: 'Paid Leave (CP)', fr: 'Congés Payés (CP)' },
     shortLabel: { en: 'CP', fr: 'CP' },
-    cellClass: 'bg-leave-cp text-white hover:bg-leave-cp-hover',
-    dotClass: 'bg-leave-cp',
+    cellClass: 'bg-leave-cp text-white border-transparent hover:bg-leave-cp-hover',
+    swatch: { dotClass: 'bg-leave-cp' },
+    isLeave: true,
   },
   [LeaveType.RTT]: {
     shortcut: '2',
     label: { en: 'RTT', fr: 'RTT' },
     shortLabel: { en: 'RTT', fr: 'RTT' },
-    cellClass: 'bg-leave-rtt text-white hover:bg-leave-rtt-hover',
-    dotClass: 'bg-leave-rtt',
+    cellClass: 'bg-leave-rtt text-white border-transparent hover:bg-leave-rtt-hover',
+    swatch: { dotClass: 'bg-leave-rtt' },
+    isLeave: true,
   },
   [LeaveType.UNPAID]: {
     shortcut: '3',
     label: { en: 'Unpaid Leave', fr: 'Sans solde' },
     shortLabel: { en: 'Unpaid', fr: 'Sans solde' },
-    cellClass: 'bg-leave-unpaid text-white hover:bg-leave-unpaid-hover',
-    dotClass: 'bg-leave-unpaid',
+    cellClass: 'bg-leave-unpaid text-white border-transparent hover:bg-leave-unpaid-hover',
+    swatch: { dotClass: 'bg-leave-unpaid' },
+    isLeave: true,
   },
   [LeaveType.SICK]: {
     shortcut: '4',
     label: { en: 'Sick Leave', fr: 'Arrêt maladie' },
     shortLabel: { en: 'Sick', fr: 'Maladie' },
-    cellClass: 'bg-leave-sick text-white hover:bg-leave-sick-hover',
-    dotClass: 'bg-leave-sick',
+    cellClass: 'bg-leave-sick text-white border-transparent hover:bg-leave-sick-hover',
+    swatch: { dotClass: 'bg-leave-sick' },
+    isLeave: true,
+  },
+  // A worked day: marked on the calendar, ignored by the balances.
+  [LeaveType.WFH]: {
+    shortcut: '6',
+    label: { en: 'Work from home', fr: 'Télétravail' },
+    cellClass: 'bg-white text-slate-700 border-dashed border-slate-400 hover:bg-slate-50',
+    swatch: { icon: House },
+    isLeave: false,
   },
 };
 

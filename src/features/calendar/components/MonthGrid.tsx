@@ -52,6 +52,11 @@ const MonthGrid = ({
     const leaveType = plan[dateStr];
     const today = isToday(dateStr);
 
+    const previewing = selection.has(dateStr) && !isWknd && !holiday;
+    const shownType = previewing ? activeTool : leaveType;
+    const swatch = shownType ? LEAVE_TYPES[shownType].swatch : null;
+    const DayIcon = swatch && 'icon' in swatch ? swatch.icon : null;
+
     let bgClass = 'bg-white hover:bg-slate-50';
     let textClass = 'text-slate-700';
     let cursorClass = 'cursor-pointer';
@@ -60,8 +65,8 @@ const MonthGrid = ({
     // Apply Styles
     if (leaveType) {
       bgClass = LEAVE_TYPES[leaveType].cellClass;
-      textClass = 'text-white font-bold';
-      borderClass = 'border-transparent';
+      textClass = 'font-bold';
+      borderClass = '';
     } else if (holiday) {
       bgClass = 'bg-[#fff1f2]';
       textClass = 'text-[#be123c] font-bold';
@@ -73,11 +78,12 @@ const MonthGrid = ({
     }
 
     // Apply Drag Preview Overrides
-    if (selection.has(dateStr) && !isWknd && !holiday) {
+    if (previewing) {
       if (activeTool) {
         // Show active tool color
         bgClass = LEAVE_TYPES[activeTool].cellClass;
-        textClass = 'text-white font-bold';
+        textClass = 'font-bold';
+        borderClass = '';
       } else {
         // Eraser preview (white/cleared)
         bgClass = 'bg-slate-50 ring-2 ring-slate-300 z-10';
@@ -102,6 +108,9 @@ const MonthGrid = ({
         `}
       >
         <span>{d}</span>
+        {DayIcon && (
+          <DayIcon size={10} aria-hidden className="absolute bottom-0.5 right-0.5 text-slate-500" />
+        )}
         {today && (
           <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white shadow-sm" />
         )}

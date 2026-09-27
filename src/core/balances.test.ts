@@ -4,7 +4,7 @@ import { buildYearCalendar } from './calendar';
 import { CP_PER_MONTH } from './rules';
 import { type BalanceCheckpoint, LeaveType, type Plan } from './types';
 
-const { CP, RTT, UNPAID, SICK } = LeaveType;
+const { CP, RTT, UNPAID, SICK, WFH } = LeaveType;
 
 // Without public holidays, 2024 has 262 weekdays (19 RTT) and 2023 has 260 (17 RTT).
 const NO_HOLIDAYS = (year: number) => buildYearCalendar(year, []);
@@ -115,6 +115,16 @@ describe('projectYear', () => {
       3
     );
     expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
+  });
+
+  test('work-from-home days never change a balance', () => {
+    const checkpoints = [checkpoint('2024-01-01', 3, 5, 1)];
+    const wfh = project(
+      2024,
+      { '2024-01-02': WFH, '2024-05-31': WFH, '2024-12-02': WFH },
+      checkpoints
+    );
+    expect(wfh).toEqual(project(2024, {}, checkpoints));
   });
 
   test('a checkpoint resets the running balances mid-year', () => {

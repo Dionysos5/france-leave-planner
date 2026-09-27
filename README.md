@@ -1,6 +1,6 @@
 # France Leave Planner
 
-Plan your leave days visually — paint CP, RTT, unpaid and sick days onto a year calendar and watch your balances update as you go.
+Plan your leave days visually — paint CP, RTT, unpaid and sick days onto a year calendar and watch your balances update as you go. Work-from-home days can be marked too; they never change a balance.
 
 Built for one profile: a **cadre au forfait jours (218 days) under the Syntec agreement (IDCC 1486), France métropolitaine**.
 
@@ -23,6 +23,7 @@ Built for one profile: a **cadre au forfait jours (218 days) under the Syntec ag
 | 3 | Unpaid tool |
 | 4 | Sick tool |
 | 5 | Eraser |
+| 6 | Work from home |
 
 Shortcuts use physical key positions, so they work on AZERTY keyboards without Shift.
 
