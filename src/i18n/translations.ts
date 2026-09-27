@@ -48,8 +48,10 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     rttNotCovered: (days) => `${days} more than the year earns`,
     cpBreakdown: (previous, current) => `CP N-1: ${previous} · CP N: ${current}`,
     lostOn: (days, date) => `${days} lost ${date}`,
-    firstRunHint: 'Click or drag days to paint your leave — 1–6 switch tools.',
-    firstRunHintTouch: 'Tap a day to paint it, or long-press and drag to paint a range.',
+    firstRunHint:
+      'Click or drag days to paint your leave; click again for a half day — 1–6 switch tools.',
+    firstRunHintTouch:
+      'Tap a day to paint it, tap again for a half day, or long-press and drag to paint a range.',
     previousYear: 'Previous year',
     nextYear: 'Next year',
     weekdays: [
@@ -80,6 +82,7 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
         'Unpaid leave reduces the CP and RTT earned that month, in proportion.',
         "Sick leave still earns 80% of CP and doesn't reduce RTT.",
         'Work-from-home days are worked days: they never change a balance.',
+        'CP, RTT and work from home can be taken by half day (morning or afternoon); sick and unpaid leave are whole days.',
       ],
     },
   },
@@ -98,9 +101,9 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     cpBreakdown: (previous, current) => `CP N-1 : ${previous} · CP N : ${current}`,
     lostOn: (days, date) => `${days} perdus le ${date}`,
     firstRunHint:
-      "Cliquez ou glissez sur les jours pour poser vos congés — 1 à 6 pour changer d'outil.",
+      "Cliquez ou glissez sur les jours pour poser vos congés ; cliquez à nouveau pour une demi-journée — 1 à 6 pour changer d'outil.",
     firstRunHintTouch:
-      'Touchez un jour pour le poser, ou appuyez longuement puis glissez pour une période.',
+      'Touchez un jour pour le poser, touchez à nouveau pour une demi-journée, ou appuyez longuement puis glissez pour une période.',
     previousYear: 'Année précédente',
     nextYear: 'Année suivante',
     weekdays: [
@@ -131,6 +134,7 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
         'Le congé sans solde réduit au prorata les CP et RTT acquis dans le mois.',
         "L'arrêt maladie acquiert 80 % des CP et ne réduit pas les RTT.",
         'Les jours de télétravail sont des jours travaillés : ils ne modifient aucun solde.',
+        "CP, RTT et télétravail peuvent se poser à la demi-journée (matin ou après-midi) ; l'arrêt maladie et le congé sans solde se posent à la journée.",
       ],
     },
   },

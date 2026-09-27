@@ -3,19 +3,49 @@ import { buildYearCalendar } from './calendar';
 import { applyRange, applyToggle, resolveSelection } from './plan';
 import { DayType } from './types';
 
-const { CP, RTT, UNPAID } = DayType;
+const { CP, RTT, UNPAID, SICK, WFH } = DayType;
+const DAY = '2026-07-13';
 
 describe('applyToggle', () => {
-  test('adds a leave on an empty day', () => {
-    expect(applyToggle({}, '2026-07-13', CP)).toEqual({ '2026-07-13': CP });
+  test('adds a full day on an empty day', () => {
+    expect(applyToggle({}, DAY, CP)).toEqual({ [DAY]: CP });
   });
 
-  test('re-clicking the same tool removes the leave', () => {
-    expect(applyToggle({ '2026-07-13': CP }, '2026-07-13', CP)).toEqual({});
+  test('a half-day tool cycles full day → morning → afternoon → free', () => {
+    let plan = applyToggle({}, DAY, RTT);
+    expect(plan).toEqual({ [DAY]: RTT });
+    plan = applyToggle(plan, DAY, RTT);
+    expect(plan).toEqual({ [DAY]: { am: RTT } });
+    plan = applyToggle(plan, DAY, RTT);
+    expect(plan).toEqual({ [DAY]: { pm: RTT } });
+    plan = applyToggle(plan, DAY, RTT);
+    expect(plan).toEqual({});
   });
 
-  test('re-clicking a different tool replaces the leave', () => {
-    expect(applyToggle({ '2026-07-13': CP }, '2026-07-13', RTT)).toEqual({ '2026-07-13': RTT });
+  test('next to another type, a half-day tool fills the free half', () => {
+    expect(applyToggle({ [DAY]: { am: CP } }, DAY, WFH)).toEqual({ [DAY]: { am: CP, pm: WFH } });
+    expect(applyToggle({ [DAY]: { pm: CP } }, DAY, WFH)).toEqual({ [DAY]: { am: WFH, pm: CP } });
+  });
+
+  test('on a mixed day, the tool frees its own half', () => {
+    expect(applyToggle({ [DAY]: { am: CP, pm: WFH } }, DAY, WFH)).toEqual({ [DAY]: { am: CP } });
+    expect(applyToggle({ [DAY]: { am: CP, pm: WFH } }, DAY, CP)).toEqual({ [DAY]: { pm: WFH } });
+  });
+
+  test('a half-day tool replaces a full day or a mix of other types', () => {
+    expect(applyToggle({ [DAY]: CP }, DAY, RTT)).toEqual({ [DAY]: RTT });
+    expect(applyToggle({ [DAY]: SICK }, DAY, WFH)).toEqual({ [DAY]: WFH });
+    expect(applyToggle({ [DAY]: { am: CP, pm: WFH } }, DAY, RTT)).toEqual({ [DAY]: RTT });
+  });
+
+  test('whole-day types toggle the full day', () => {
+    expect(applyToggle({}, DAY, UNPAID)).toEqual({ [DAY]: UNPAID });
+    expect(applyToggle({ [DAY]: UNPAID }, DAY, UNPAID)).toEqual({});
+    expect(applyToggle({ [DAY]: { am: CP, pm: WFH } }, DAY, SICK)).toEqual({ [DAY]: SICK });
+  });
+
+  test('the eraser clears a split day', () => {
+    expect(applyToggle({ [DAY]: { am: CP, pm: WFH } }, DAY, null)).toEqual({});
   });
 
   test('the eraser removes without touching other days', () => {
