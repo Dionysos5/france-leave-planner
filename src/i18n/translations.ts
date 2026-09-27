@@ -6,7 +6,8 @@ export interface Translations {
   eraser: string;
   close: string;
   showPast: string;
-  hidePast: string;
+  hidePast: (count: number) => string;
+  pastHidden: (count: number) => string;
   cpBalance: string;
   rttToTake: (date: string) => string;
   rttNotCovered: (days: string) => string;
@@ -39,8 +40,9 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     settingsTooltip: 'Settings',
     eraser: 'Eraser',
     close: 'Close',
-    showPast: 'Show past months',
-    hidePast: 'Hide past months',
+    showPast: 'Show',
+    hidePast: (count) => (count === 1 ? 'Hide last month' : `Hide the ${count} past months`),
+    pastHidden: (count) => (count === 1 ? 'Last month hidden' : `${count} past months hidden`),
     cpBalance: 'CP Balance',
     rttToTake: (date) => `RTT to take by ${date}`,
     rttNotCovered: (days) => `${days} more than the year earns`,
@@ -86,8 +88,10 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     settingsTooltip: 'Paramètres',
     eraser: 'Gomme',
     close: 'Fermer',
-    showPast: 'Afficher les mois passés',
-    hidePast: 'Masquer les mois passés',
+    showPast: 'Afficher',
+    hidePast: (count) =>
+      count === 1 ? 'Masquer le mois passé' : `Masquer les ${count} mois passés`,
+    pastHidden: (count) => (count === 1 ? 'Mois passé masqué' : `${count} mois passés masqués`),
     cpBalance: 'Solde CP',
     rttToTake: (date) => `RTT à poser d'ici le ${date}`,
     rttNotCovered: (days) => `${days} de plus que l'acquis de l'année`,

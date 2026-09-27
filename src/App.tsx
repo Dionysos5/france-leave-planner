@@ -1,8 +1,8 @@
 import { IconButton } from '@components/ui/Button';
 import BalanceSummary from '@features/balances/components/BalanceSummary';
-import { HidePastToggle } from '@features/calendar/components/HidePastToggle';
 import LeaveToolbar from '@features/calendar/components/LeaveToolbar';
 import MonthGrid from '@features/calendar/components/MonthGrid';
+import { PastMonthsToggle } from '@features/calendar/components/PastMonthsToggle';
 import SettingsPanel from '@features/settings/components/SettingsPanel';
 import { useEditorState } from '@hooks/useEditorState';
 import { useLeavePlan } from '@hooks/useLeavePlan';
@@ -33,6 +33,11 @@ function App() {
   } = useLeavePlan(calendar, activeTool);
   const { selection, pressDay } = usePaintSelection(calendar, handleToggleDay, handleRangeUpdate);
 
+  // Only the current year has past months to hide.
+  const now = new Date();
+  const pastCount = calendar.year === now.getFullYear() ? now.getMonth() : 0;
+  const hidePast = uiPreferences.hidePastMonths;
+
   return (
     <div className="min-h-screen pb-32">
       <header className="px-4 pt-4 pb-2 md:px-6 md:pt-8 md:pb-4 max-w-7xl mx-auto">
@@ -59,11 +64,6 @@ function App() {
                 >
                   <ChevronRight size={13} />
                 </IconButton>
-                <HidePastToggle
-                  uiPreferences={uiPreferences}
-                  setUiPreferences={setUiPreferences}
-                  className="ml-1 w-8 h-8 md:w-6 md:h-6 rounded"
-                />
               </div>
             </div>
           </div>
@@ -91,14 +91,15 @@ function App() {
             {isTouchScreen ? translations.firstRunHintTouch : translations.firstRunHint}
           </div>
         )}
+        <PastMonthsToggle
+          pastCount={pastCount}
+          hidden={hidePast}
+          onToggle={() => setUiPreferences({ ...uiPreferences, hidePastMonths: !hidePast })}
+        />
         <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 md:gap-4 animate-enter-up">
           {Array.from({ length: 12 })
             .map((_, i) => i)
-            .filter((i) => {
-              if (!uiPreferences.hidePastMonths) return true;
-              const now = new Date();
-              return calendar.year === now.getFullYear() ? i >= now.getMonth() : true;
-            })
+            .filter((i) => !hidePast || i >= pastCount)
             .map((i) => (
               <MonthGrid
                 key={i}
