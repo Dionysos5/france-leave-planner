@@ -61,7 +61,11 @@ const LeaveToolbar = ({
     return toolButton(
       type,
       'icon' in swatch ? (
-        <swatch.icon size={14} aria-hidden />
+        <swatch.icon
+          size={14}
+          aria-hidden
+          className={activeTool === type ? undefined : swatch.iconClass}
+        />
       ) : (
         <span className={`w-2.5 h-2.5 rounded-sm ${swatch.dotClass}`} />
       ),

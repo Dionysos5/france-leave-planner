@@ -11,7 +11,7 @@ interface DayTypeDescriptor {
   /** Classes for a painted day: background, text and border. Colors are defined in index.css. */
   cellClass: string;
   /** Toolbar swatch: a colored dot, or an icon that is also drawn on painted days. */
-  swatch: { dotClass: string } | { icon: LucideIcon };
+  swatch: { dotClass: string } | { icon: LucideIcon; iconClass: string };
   /** Leave tools sit before the eraser in the toolbar, the others after it. */
   isLeave: boolean;
 }
@@ -54,8 +54,8 @@ export const DAY_TYPES: Record<DayType, DayTypeDescriptor> = {
   [DayType.WFH]: {
     shortcut: '6',
     label: { en: 'Work from home', fr: 'Télétravail' },
-    cellClass: 'bg-white text-slate-700 border-dashed border-slate-400 hover:bg-slate-50',
-    swatch: { icon: House },
+    cellClass: 'bg-wfh-tint text-wfh-ink border-wfh-border hover:bg-wfh-tint-hover',
+    swatch: { icon: House, iconClass: 'text-wfh-ink' },
     isLeave: false,
   },
 };

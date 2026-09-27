@@ -109,7 +109,7 @@ const MonthGrid = ({
       >
         <span>{d}</span>
         {DayIcon && (
-          <DayIcon size={10} aria-hidden className="absolute bottom-0.5 right-0.5 text-slate-500" />
+          <DayIcon size={11} aria-hidden className="absolute bottom-0.5 right-0.5 opacity-80" />
         )}
         {today && (
           <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white shadow-sm" />
