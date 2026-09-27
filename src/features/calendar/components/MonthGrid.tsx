@@ -3,7 +3,7 @@ import { LEAVE_TYPES } from '@constants';
 import type { LeaveType, Plan } from '@core';
 import { formatDate, getDayInfo, getMonthDays, isToday, type YearCalendar } from '@core';
 import { useTranslation } from '@i18n/LocaleContext';
-import type { MouseEvent } from 'react';
+import type { PointerEvent } from 'react';
 
 interface MonthGridProps {
   calendar: YearCalendar;
@@ -11,8 +11,7 @@ interface MonthGridProps {
   plan: Plan;
   activeTool: LeaveType | null;
   selection: ReadonlySet<string>;
-  onSelectionStart: (dateStr: string) => void;
-  onSelectionExtend: (dateStr: string) => void;
+  onDayPress: (dateStr: string, event: PointerEvent) => void;
 }
 
 const MonthGrid = ({
@@ -21,8 +20,7 @@ const MonthGrid = ({
   plan,
   activeTool,
   selection,
-  onSelectionStart,
-  onSelectionExtend,
+  onDayPress,
 }: MonthGridProps) => {
   const { locale, translations } = useTranslation();
   const monthDays = getMonthDays(calendar, month);
@@ -87,20 +85,17 @@ const MonthGrid = ({
       }
     }
 
-    const handleMouseDown = (e: MouseEvent) => {
-      // Only left click
-      if (e.button !== 0) return;
+    const handlePointerDown = (e: PointerEvent) => {
       if (holiday || isWknd) return;
-
-      e.preventDefault(); // Prevent text selection
-      onSelectionStart(dateStr);
+      onDayPress(dateStr, e);
     };
 
     const cell = (
       <div
         key={d}
-        onMouseDown={handleMouseDown}
-        onMouseEnter={() => onSelectionExtend(dateStr)}
+        data-date={dateStr}
+        onPointerDown={handlePointerDown}
+        onContextMenu={(e) => e.preventDefault()}
         className={`
           day-cell flex flex-col items-center justify-center text-xs border rounded-sm transition-all duration-75 relative select-none
           ${bgClass} ${textClass} ${cursorClass} ${borderClass}

@@ -14,6 +14,8 @@ import {
   Settings as SettingsIcon,
 } from 'lucide-react';
 
+const isTouchScreen = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+
 function App() {
   const { translations } = useTranslation();
   const { calendar, setYear, activeTool, setActiveTool, isSettingsOpen, setIsSettingsOpen } =
@@ -28,11 +30,7 @@ function App() {
     handleToggleDay,
     handleRangeUpdate,
   } = useLeavePlan(calendar, activeTool);
-  const { selection, startSelection, extendSelection } = usePaintSelection(
-    calendar,
-    handleToggleDay,
-    handleRangeUpdate
-  );
+  const { selection, pressDay } = usePaintSelection(calendar, handleToggleDay, handleRangeUpdate);
 
   return (
     <div className="min-h-screen pb-28">
@@ -83,7 +81,7 @@ function App() {
         {Object.keys(plan).length === 0 && (
           <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-white/80 px-4 py-3 text-xs font-bold text-slate-600 animate-enter-up">
             <MousePointerClick size={14} className="text-muted shrink-0" />
-            {translations.firstRunHint}
+            {isTouchScreen ? translations.firstRunHintTouch : translations.firstRunHint}
           </div>
         )}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4 animate-enter-up">
@@ -102,8 +100,7 @@ function App() {
                 plan={plan}
                 activeTool={activeTool}
                 selection={selection}
-                onSelectionStart={startSelection}
-                onSelectionExtend={extendSelection}
+                onDayPress={pressDay}
               />
             ))}
         </div>

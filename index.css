@@ -38,6 +38,8 @@ body {
 
 .day-cell {
   aspect-ratio: 1 / 1;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
 }
 
 @keyframes overlay-in {
