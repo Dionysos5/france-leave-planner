@@ -2,16 +2,18 @@
 
 @theme {
   --color-muted: #64748b;
-  /* Leave fills carry white day numbers: each is at least 5:1 (WCAG AA needs 4.5:1).
-     RTT is a magenta purple: plain purple looks like CP blue with deuteranopia. */
-  --color-leave-cp: #2563eb;
-  --color-leave-cp-hover: #1d4ed8;
-  --color-leave-rtt: #86198f;
-  --color-leave-rtt-hover: #701a75;
-  --color-leave-unpaid: #c2410c;
-  --color-leave-unpaid-hover: #9a3412;
-  --color-leave-sick: #0f766e;
-  --color-leave-sick-hover: #115e59;
+  /* Leave fills carry white day numbers: each is the lightest shade of its hue that keeps
+     4.6:1 (WCAG AA needs 4.5:1). RTT is an orchid magenta: plain purple looks like CP blue
+     with deuteranopia; this one stays at least deltaE 20 from the other fills for
+     deuteranopia and protanopia. Hovers go one step darker. */
+  --color-leave-cp: #346dec;
+  --color-leave-cp-hover: #2563eb;
+  --color-leave-rtt: #c932b0;
+  --color-leave-rtt-hover: #a82894;
+  --color-leave-unpaid: #d0460d;
+  --color-leave-unpaid-hover: #c2410c;
+  --color-leave-sick: #11837a;
+  --color-leave-sick-hover: #0f766e;
   /* WFH is a worked day: a muted tint, so leave stays the loudest color.
      Ink on tint 7.5:1; the border carries the shape against white at 3.4:1 (needs 3:1). */
   --color-wfh-tint: #eef2ea;
