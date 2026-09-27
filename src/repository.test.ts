@@ -26,7 +26,9 @@ describe('createRepository', () => {
     const state = createRepository(storageWith(blob)).load();
     expect(state.plan).toEqual({ '2026-07-14': 'CP' });
     expect(state.settings).toEqual({
-      checkpoints: [{ dateStr: '2026-01-01', cpPrevious: 0, cpCurrent: 12.5, rtt: 4 }],
+      checkpoints: [
+        { id: 'checkpoint-0', dateStr: '2026-01-01', cpPrevious: 0, cpCurrent: 12.5, rtt: 4 },
+      ],
     });
   });
 
@@ -74,18 +76,21 @@ describe('createRepository', () => {
     const state = createRepository(storageWith(blob)).load();
     expect(state.plan).toEqual({ '2026-07-14': 'CP' });
     expect(state.settings).toEqual({
-      checkpoints: [{ dateStr: '2026-08-01', cpPrevious: 0, cpCurrent: 10, rtt: 3 }],
+      checkpoints: [
+        { id: 'checkpoint-0', dateStr: '2026-08-01', cpPrevious: 0, cpCurrent: 10, rtt: 3 },
+      ],
     });
   });
 
-  test('v4 state loads as-is with invalid checkpoints dropped', () => {
+  test('v4 state loads with invalid checkpoints dropped and missing ids filled', () => {
     const blob = JSON.stringify({
       version: 4,
       leaves: { '2026-07-15': 'SICK' },
       settings: {
         checkpoints: [
-          { dateStr: '2026-08-01', cpPrevious: 4, cpCurrent: 10, rtt: 3 },
-          { dateStr: 'not-a-date', cpPrevious: 5, cpCurrent: 0, rtt: 0 },
+          { id: 'a1', dateStr: '2026-08-01', cpPrevious: 4, cpCurrent: 10, rtt: 3 },
+          { id: 'b2', dateStr: 'not-a-date', cpPrevious: 5, cpCurrent: 0, rtt: 0 },
+          { dateStr: '2026-09-01', cpPrevious: 1, cpCurrent: 2, rtt: 3 },
         ],
       },
       uiPreferences: { hidePastMonths: false },
@@ -93,7 +98,8 @@ describe('createRepository', () => {
     const state = createRepository(storageWith(blob)).load();
     expect(state.plan).toEqual({ '2026-07-15': 'SICK' });
     expect(state.settings.checkpoints).toEqual([
-      { dateStr: '2026-08-01', cpPrevious: 4, cpCurrent: 10, rtt: 3 },
+      { id: 'a1', dateStr: '2026-08-01', cpPrevious: 4, cpCurrent: 10, rtt: 3 },
+      { id: 'checkpoint-2', dateStr: '2026-09-01', cpPrevious: 1, cpCurrent: 2, rtt: 3 },
     ]);
   });
 

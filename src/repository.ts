@@ -64,21 +64,28 @@ const sanitizePlan = (value: unknown): Plan => {
   return plan;
 };
 
+type CheckpointBalances = Omit<BalanceCheckpoint, 'id' | 'dateStr'>;
+
+// Checkpoints saved before ids existed get a positional one.
+const checkpointId = (value: unknown, index: number): string => {
+  return typeof value === 'string' && value ? value : `checkpoint-${index}`;
+};
+
 const sanitizeCheckpoints = (
   value: unknown,
-  toCheckpoint: (entry: Record<string, unknown>, dateStr: string) => BalanceCheckpoint
+  toBalances: (entry: Record<string, unknown>) => CheckpointBalances
 ): BalanceCheckpoint[] => {
   if (!Array.isArray(value)) {
     return [];
   }
   const checkpoints: BalanceCheckpoint[] = [];
-  for (const entry of value) {
+  for (const [index, entry] of value.entries()) {
     if (!entry || typeof entry !== 'object') {
       continue;
     }
     const c = entry as Record<string, unknown>;
     if (isDateStr(c.dateStr)) {
-      checkpoints.push(toCheckpoint(c, c.dateStr));
+      checkpoints.push({ id: checkpointId(c.id, index), dateStr: c.dateStr, ...toBalances(c) });
     }
   }
   return checkpoints;
@@ -90,8 +97,7 @@ const sanitizeSettings = (value: unknown): LeaveSettings => {
   }
   const s = value as { checkpoints?: unknown };
   return {
-    checkpoints: sanitizeCheckpoints(s.checkpoints, (c, dateStr) => ({
-      dateStr,
+    checkpoints: sanitizeCheckpoints(s.checkpoints, (c) => ({
       cpPrevious: finiteOr(c.cpPrevious, 0),
       cpCurrent: finiteOr(c.cpCurrent, 0),
       rtt: finiteOr(c.rtt, 0),
@@ -107,8 +113,7 @@ const upgradeSettingsV3toV4 = (value: unknown): LeaveSettings => {
   }
   const s = value as { checkpoints?: unknown };
   return {
-    checkpoints: sanitizeCheckpoints(s.checkpoints, (c, dateStr) => ({
-      dateStr,
+    checkpoints: sanitizeCheckpoints(s.checkpoints, (c) => ({
       cpPrevious: 0,
       cpCurrent: finiteOr(c.balanceCP, 0),
       rtt: finiteOr(c.balanceRTT, 0),
@@ -131,7 +136,15 @@ const upgradeSettingsV2toV4 = (value: unknown): LeaveSettings => {
   const s = sanitizeSettingsV2(value);
   const checkpoints: BalanceCheckpoint[] =
     s.initialCP !== 0 || s.initialRTT !== 0
-      ? [{ dateStr: '2026-01-01', cpPrevious: 0, cpCurrent: s.initialCP, rtt: s.initialRTT }]
+      ? [
+          {
+            id: checkpointId(undefined, 0),
+            dateStr: '2026-01-01',
+            cpPrevious: 0,
+            cpCurrent: s.initialCP,
+            rtt: s.initialRTT,
+          },
+        ]
       : [];
   return { checkpoints };
 };

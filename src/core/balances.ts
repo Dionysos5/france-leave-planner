@@ -43,6 +43,7 @@ export const projectYear = (
   settings: LeaveSettings,
   calendarFor: CalendarForYear = frenchCalendar
 ): YearProjection => {
+  // Two checkpoints on the same date: the one listed last wins.
   const checkpoints = new Map(settings.checkpoints.map((c) => [c.dateStr, c]));
   const earliestYear = Math.min(
     ...settings.checkpoints.map((c) => Number.parseInt(c.dateStr.slice(0, 4), 10))

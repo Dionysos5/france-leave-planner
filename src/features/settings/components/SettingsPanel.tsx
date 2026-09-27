@@ -27,20 +27,18 @@ const BALANCE_FIELDS = ['cpPrevious', 'cpCurrent', 'rtt'] as const;
 const SettingsPanel = ({ calendar, settings, onUpdate, isOpen, onClose }: SettingsPanelProps) => {
   const { locale, setLocale, translations } = useTranslation();
 
-  const updateCheckpoint = (index: number, patch: Partial<BalanceCheckpoint>) => {
-    if (patch.dateStr !== undefined && !patch.dateStr) {
+  const updateCheckpoint = (id: string, patch: Partial<BalanceCheckpoint>) => {
+    // A cleared date input reports ''; keep the last valid date.
+    if (patch.dateStr === '') {
       return;
     }
-    const next = settings.checkpoints.map((c, i) => (i === index ? { ...c, ...patch } : c));
-    const checkpoints =
-      patch.dateStr === undefined
-        ? next
-        : next.filter((c, i) => i === index || c.dateStr !== patch.dateStr);
+    const checkpoints = settings.checkpoints.map((c) => (c.id === id ? { ...c, ...patch } : c));
     onUpdate({ ...settings, checkpoints });
   };
 
   const addCheckpoint = () => {
     const checkpoint: BalanceCheckpoint = {
+      id: crypto.randomUUID(),
       dateStr: formatDate(new Date()),
       cpPrevious: 0,
       cpCurrent: 0,
@@ -49,8 +47,8 @@ const SettingsPanel = ({ calendar, settings, onUpdate, isOpen, onClose }: Settin
     onUpdate({ ...settings, checkpoints: [...settings.checkpoints, checkpoint] });
   };
 
-  const removeCheckpoint = (index: number) => {
-    const checkpoints = settings.checkpoints.filter((_, i) => i !== index);
+  const removeCheckpoint = (id: string) => {
+    const checkpoints = settings.checkpoints.filter((c) => c.id !== id);
     onUpdate({ ...settings, checkpoints });
   };
 
@@ -82,22 +80,19 @@ const SettingsPanel = ({ calendar, settings, onUpdate, isOpen, onClose }: Settin
         </p>
         <p className="text-xs text-muted mb-4">{translations.settings.checkpointHint}</p>
         <div className="space-y-3">
-          {settings.checkpoints.map((checkpoint, index) => (
-            <div
-              key={checkpoint.dateStr}
-              className="space-y-2 rounded-md border border-slate-200 p-2"
-            >
+          {settings.checkpoints.map((checkpoint) => (
+            <div key={checkpoint.id} className="space-y-2 rounded-md border border-slate-200 p-2">
               <div className="flex items-center gap-2">
                 <input
                   type="date"
                   value={checkpoint.dateStr}
                   aria-label={translations.settings.asOf}
-                  onChange={(e) => updateCheckpoint(index, { dateStr: e.target.value })}
+                  onChange={(e) => updateCheckpoint(checkpoint.id, { dateStr: e.target.value })}
                   className={fieldClass}
                 />
                 <button
                   type="button"
-                  onClick={() => removeCheckpoint(index)}
+                  onClick={() => removeCheckpoint(checkpoint.id)}
                   aria-label={translations.settings.removeCheckpoint}
                   className="w-8 h-8 shrink-0 flex cursor-pointer items-center justify-center rounded-md text-muted hover:text-red-500 hover:bg-slate-100 transition-colors"
                 >
@@ -108,17 +103,17 @@ const SettingsPanel = ({ calendar, settings, onUpdate, isOpen, onClose }: Settin
                 {BALANCE_FIELDS.map((field) => (
                   <div key={field}>
                     <label
-                      htmlFor={`checkpoint-${index}-${field}`}
+                      htmlFor={`${checkpoint.id}-${field}`}
                       className="block text-[10px] font-bold text-slate-500 mb-1"
                     >
                       {translations.settings[field]}
                     </label>
                     <NumberInput
-                      id={`checkpoint-${index}-${field}`}
+                      id={`${checkpoint.id}-${field}`}
                       step="0.5"
                       className={`${fieldClass} text-right`}
                       value={checkpoint[field]}
-                      onValueChange={(val) => updateCheckpoint(index, { [field]: val })}
+                      onValueChange={(val) => updateCheckpoint(checkpoint.id, { [field]: val })}
                     />
                   </div>
                 ))}

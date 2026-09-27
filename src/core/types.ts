@@ -17,6 +17,7 @@ export interface PublicHoliday {
 
 /** Balances as printed on a payslip, applied at the start of `dateStr`. */
 export interface BalanceCheckpoint {
+  id: string;
   dateStr: string;
   /** CP N-1: earned in the previous reference period, lost if untaken by May 31. */
   cpPrevious: number;

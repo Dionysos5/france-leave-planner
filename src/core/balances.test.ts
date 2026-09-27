@@ -15,6 +15,7 @@ const project = (year: number, plan: Plan, checkpoints: BalanceCheckpoint[] = []
   projectYear(year, plan, { checkpoints }, NO_HOLIDAYS);
 
 const checkpoint = (dateStr: string, cpPrevious: number, cpCurrent: number, rtt: number) => ({
+  id: dateStr,
   dateStr,
   cpPrevious,
   cpCurrent,
