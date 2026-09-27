@@ -103,6 +103,28 @@ describe('createRepository', () => {
     ]);
   });
 
+  test('split days load with invalid halves dropped', () => {
+    const blob = JSON.stringify({
+      version: 4,
+      leaves: {
+        '2026-07-13': { am: 'CP', pm: 'WFH' },
+        '2026-07-15': { pm: 'RTT' },
+        '2026-07-16': { am: 'SICK', pm: 'CP' },
+        '2026-07-17': { am: 'CP', pm: 'CP' },
+        '2026-07-20': { am: 'UNPAID' },
+        '2026-07-21': { am: 'nope' },
+      },
+      settings: { checkpoints: [] },
+      uiPreferences: { hidePastMonths: false },
+    });
+    expect(createRepository(storageWith(blob)).load().plan).toEqual({
+      '2026-07-13': { am: 'CP', pm: 'WFH' },
+      '2026-07-15': { pm: 'RTT' },
+      '2026-07-16': { pm: 'CP' },
+      '2026-07-17': 'CP',
+    });
+  });
+
   test('unknown versions yield defaults', () => {
     const blob = JSON.stringify({ version: 99, leaves: { '2026-07-14': 'CP' } });
     expect(createRepository(storageWith(blob)).load().plan).toEqual({});
@@ -118,11 +140,15 @@ describe('createRepository', () => {
     };
     const repository = createRepository(storage);
     repository.save({
-      plan: { '2026-07-14': 'CP', '2026-07-15': 'RTT' },
+      plan: { '2026-07-14': 'CP', '2026-07-15': 'RTT', '2026-07-16': { am: 'CP', pm: 'WFH' } },
       settings: DEFAULT_SETTINGS,
       uiPreferences: DEFAULT_UI_PREFS,
     });
-    expect(repository.load().plan).toEqual({ '2026-07-14': 'CP', '2026-07-15': 'RTT' });
+    expect(repository.load().plan).toEqual({
+      '2026-07-14': 'CP',
+      '2026-07-15': 'RTT',
+      '2026-07-16': { am: 'CP', pm: 'WFH' },
+    });
   });
 
   test('malformed JSON yields defaults', () => {

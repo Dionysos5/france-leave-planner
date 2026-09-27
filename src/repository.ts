@@ -1,5 +1,13 @@
 import { DEFAULT_SETTINGS, DEFAULT_UI_PREFS, STORAGE_KEY, STORAGE_VERSION } from '@constants';
-import { type BalanceCheckpoint, DayType, type LeaveSettings, type Plan } from '@core';
+import {
+  type BalanceCheckpoint,
+  type DayEntry,
+  DayType,
+  entryOf,
+  isHalfDayType,
+  type LeaveSettings,
+  type Plan,
+} from '@core';
 import type { UIPreferences } from '@shared/types';
 
 export interface PersistedState {
@@ -51,14 +59,31 @@ const finiteOr = (value: unknown, fallback: number): number => {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 };
 
+const sanitizeHalf = (value: unknown): DayType | null => {
+  return isDayType(value) && isHalfDayType(value) ? value : null;
+};
+
+// A full day is a bare DayType; a split day is { am?, pm? } holding half-day types only.
+const sanitizeEntry = (value: unknown): DayEntry | undefined => {
+  if (isDayType(value)) {
+    return value;
+  }
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const { am, pm } = value as { am?: unknown; pm?: unknown };
+  return entryOf({ am: sanitizeHalf(am), pm: sanitizeHalf(pm) });
+};
+
 const sanitizePlan = (value: unknown): Plan => {
   if (!value || typeof value !== 'object') {
     return {};
   }
   const plan: Plan = {};
-  for (const [dateStr, type] of Object.entries(value)) {
-    if (isDateStr(dateStr) && isDayType(type)) {
-      plan[dateStr] = type;
+  for (const [dateStr, raw] of Object.entries(value)) {
+    const entry = sanitizeEntry(raw);
+    if (isDateStr(dateStr) && entry !== undefined) {
+      plan[dateStr] = entry;
     }
   }
   return plan;

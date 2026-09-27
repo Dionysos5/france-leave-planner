@@ -127,6 +127,30 @@ describe('projectYear', () => {
     expect(wfh).toEqual(project(2024, {}, checkpoints));
   });
 
+  test('half days count as half', () => {
+    const { months } = project(2024, {
+      '2024-01-02': { am: CP },
+      '2024-01-03': { pm: RTT },
+      '2024-01-04': { am: RTT, pm: WFH },
+    });
+    expect(months[0].cpCurrent).toBeCloseTo(CP_PER_MONTH - 0.5, 3);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH - 1, 3);
+  });
+
+  test('a split CP + RTT day uses half of each', () => {
+    const { months } = project(2024, { '2024-01-02': { am: CP, pm: RTT } }, [
+      checkpoint('2024-01-01', 2, 0, 3),
+    ]);
+    expect(months[0].cpPrevious).toBe(1.5);
+    expect(months[0].rtt).toBeCloseTo(2.5 + RTT_2024_PER_MONTH, 3);
+  });
+
+  test('a full CP day spans N-1 and N when N-1 has less than a day left', () => {
+    const { months } = project(2024, { '2024-01-02': CP }, [checkpoint('2024-01-01', 0.3, 5, 0)]);
+    expect(months[0].cpPrevious).toBe(0);
+    expect(months[0].cpCurrent).toBeCloseTo(4.3 + CP_PER_MONTH, 3);
+  });
+
   test('a checkpoint resets the running balances mid-year', () => {
     const { months } = project(2024, { '2024-01-02': CP }, [checkpoint('2024-03-01', 2, 7, 4)]);
     expect(months[2]).toEqual({

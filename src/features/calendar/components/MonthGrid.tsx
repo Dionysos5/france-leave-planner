@@ -49,7 +49,9 @@ const MonthGrid = ({
     const info = getDayInfo(calendar, dateStr);
     const isWknd = info.kind === 'weekend';
     const holiday = info.holiday;
-    const dayType = plan[dateStr];
+    // Split days are drawn in a later change; until then only full days show.
+    const entry = plan[dateStr];
+    const dayType = typeof entry === 'string' ? entry : undefined;
     const today = isToday(dateStr);
 
     const previewing = selection.has(dateStr) && !isWknd && !holiday;

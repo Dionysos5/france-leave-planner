@@ -1,4 +1,5 @@
 import { formatDate, getMonthDays, isWorkableDay } from './calendar';
+import { halvesOf } from './dayEntry';
 import { frenchCalendar } from './holidays';
 import {
   CP_PER_MONTH,
@@ -25,11 +26,14 @@ const snapshot = (pools: MonthBalance): MonthBalance => ({
   rtt: round3(pools.rtt),
 });
 
+/** Each half of a day counts for this much. */
+const HALF_DAY = 0.5;
+
 /** CP is drawn from N-1 first; once it runs out, from N (taken in advance if negative). */
-const takeCP = (pools: MonthBalance) => {
-  const fromPrevious = Math.min(Math.max(pools.cpPrevious, 0), 1);
+const takeCP = (pools: MonthBalance, days: number) => {
+  const fromPrevious = Math.min(Math.max(pools.cpPrevious, 0), days);
   pools.cpPrevious -= fromPrevious;
-  pools.cpCurrent -= 1 - fromPrevious;
+  pools.cpCurrent -= days - fromPrevious;
 };
 
 /**
@@ -89,22 +93,25 @@ export const projectYear = (
         }
         workableDays += 1;
 
-        switch (plan[dateStr]) {
-          case DayType.CP:
-            takeCP(pools);
-            break;
-          case DayType.RTT:
-            pools.rtt -= 1;
-            break;
-          case DayType.UNPAID:
-            unpaidDays += 1;
-            break;
-          case DayType.SICK:
-            sickDays += 1;
-            break;
-          case DayType.WFH:
-            // Working from home is a worked day: nothing to deduct, full accrual.
-            break;
+        const { am, pm } = halvesOf(plan[dateStr]);
+        for (const type of [am, pm]) {
+          switch (type) {
+            case DayType.CP:
+              takeCP(pools, HALF_DAY);
+              break;
+            case DayType.RTT:
+              pools.rtt -= HALF_DAY;
+              break;
+            case DayType.UNPAID:
+              unpaidDays += HALF_DAY;
+              break;
+            case DayType.SICK:
+              sickDays += HALF_DAY;
+              break;
+            case DayType.WFH:
+              // Working from home is a worked day: nothing to deduct, full accrual.
+              break;
+          }
         }
       }
 

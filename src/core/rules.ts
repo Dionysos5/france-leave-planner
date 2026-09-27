@@ -1,7 +1,7 @@
 // Rules for a cadre au forfait jours under the Syntec collective agreement (IDCC 1486),
 // France métropolitaine.
 import { formatDate, isWorkableDay } from './calendar';
-import type { YearCalendar } from './types';
+import { DayType, type YearCalendar } from './types';
 
 /** Days worked per year under the forfait, journée de solidarité included. */
 export const FORFAIT_DAYS = 218;
@@ -16,6 +16,12 @@ export const CP_PERIOD_START_MONTH = 5;
 
 /** Sick leave earns 2 of the usual 2.5 jours ouvrables a month (loi du 22 avril 2024). */
 export const SICK_CP_ACCRUAL_RATIO = 0.8;
+
+/**
+ * Types that can cover half a day. The forfait may be counted in half-days; sick and unpaid
+ * leave stay whole days.
+ */
+export const HALF_DAY_TYPES: ReadonlySet<DayType> = new Set([DayType.CP, DayType.RTT, DayType.WFH]);
 
 const countWorkableDays = (calendar: YearCalendar): number => {
   let count = 0;

@@ -9,7 +9,15 @@ export const DayType = {
 } as const;
 export type DayType = (typeof DayType)[keyof typeof DayType];
 
-export type Plan = Record<string, DayType>;
+export type Half = 'am' | 'pm';
+
+/** A day split in two; a missing half is free. Only half-day types (see rules) appear here. */
+export type HalfDays = Partial<Record<Half, DayType>>;
+
+/** A bare DayType is a full day. */
+export type DayEntry = DayType | HalfDays;
+
+export type Plan = Record<string, DayEntry>;
 
 export interface PublicHoliday {
   dateStr: string;
