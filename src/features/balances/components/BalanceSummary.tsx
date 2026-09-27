@@ -32,23 +32,18 @@ interface BalanceSummaryProps {
   projection: YearProjection;
 }
 
-/** Year-end CP and RTT balances, with a warning when days will be lost. */
+/**
+ * Year-end CP balance, warning about CP N-1 lost on May 31, and the RTT left to take by
+ * December 31. RTT may dip below zero mid-year as long as the year's accrual covers it.
+ */
 const BalanceSummary = ({ year, projection }: BalanceSummaryProps) => {
   const { locale, translations } = useTranslation();
   const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-GB';
   const endBalance = projection.months[11];
   const endMonthLabel = new Date(year, 11).toLocaleString(dateLocale, { month: 'short' });
 
-  const lostWarning = (days: number, month: number, day: number) => {
-    if (days <= 0) {
-      return null;
-    }
-    const date = new Date(year, month, day).toLocaleString(dateLocale, {
-      day: 'numeric',
-      month: 'short',
-    });
-    return translations.lostOn(days.toFixed(1), date);
-  };
+  const formatDay = (month: number, day: number) =>
+    new Date(year, month, day).toLocaleString(dateLocale, { day: 'numeric', month: 'short' });
 
   return (
     <>
@@ -61,14 +56,20 @@ const BalanceSummary = ({ year, projection }: BalanceSummaryProps) => {
         <BalanceCard
           label={`${translations.cpBalance} · ${endMonthLabel} ${year}`}
           value={endBalance.cpPrevious + endBalance.cpCurrent}
-          warning={lostWarning(projection.cpLostOnMay31, 4, 31)}
+          warning={
+            projection.cpLostOnMay31 > 0
+              ? translations.lostOn(projection.cpLostOnMay31.toFixed(1), formatDay(4, 31))
+              : null
+          }
         />
       </Tooltip>
 
       <BalanceCard
-        label={`${translations.rttBalance} · ${endMonthLabel} ${year}`}
+        label={translations.rttToTake(formatDay(11, 31))}
         value={endBalance.rtt}
-        warning={lostWarning(projection.rttLostOnDec31, 11, 31)}
+        warning={
+          endBalance.rtt < 0 ? translations.rttNotCovered((-endBalance.rtt).toFixed(1)) : null
+        }
       />
     </>
   );

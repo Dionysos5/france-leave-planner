@@ -8,7 +8,8 @@ export interface Translations {
   showPast: string;
   hidePast: string;
   cpBalance: string;
-  rttBalance: string;
+  rttToTake: (date: string) => string;
+  rttNotCovered: (days: string) => string;
   cpBreakdown: (previous: string, current: string) => string;
   lostOn: (days: string, date: string) => string;
   firstRunHint: string;
@@ -40,7 +41,8 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     showPast: 'Show past months',
     hidePast: 'Hide past months',
     cpBalance: 'CP Balance',
-    rttBalance: 'RTT Balance',
+    rttToTake: (date) => `RTT to take by ${date}`,
+    rttNotCovered: (days) => `${days} more than the year earns`,
     cpBreakdown: (previous, current) => `CP N-1: ${previous} · CP N: ${current}`,
     lostOn: (days, date) => `${days} lost ${date}`,
     firstRunHint: 'Click or drag days to paint your leave — 1–5 switch tools.',
@@ -84,7 +86,8 @@ export const TRANSLATIONS: Record<Locale, Translations> = {
     showPast: 'Afficher les mois passés',
     hidePast: 'Masquer les mois passés',
     cpBalance: 'Solde CP',
-    rttBalance: 'Solde RTT',
+    rttToTake: (date) => `RTT à poser d'ici le ${date}`,
+    rttNotCovered: (days) => `${days} de plus que l'acquis de l'année`,
     cpBreakdown: (previous, current) => `CP N-1 : ${previous} · CP N : ${current}`,
     lostOn: (days, date) => `${days} perdus le ${date}`,
     firstRunHint:

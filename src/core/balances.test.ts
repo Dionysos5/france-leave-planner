@@ -70,15 +70,24 @@ describe('projectYear', () => {
     expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
   });
 
-  test('RTT left on December 31 is lost', () => {
-    const { rttLostOnDec31 } = project(2023, {}, [checkpoint('2023-06-01', 0, 0, 5)]);
-    expect(rttLostOnDec31).toBeCloseTo(5 + 7 * RTT_2023_PER_MONTH, 3);
+  test('RTT left on December 31 is lost on January 1', () => {
+    const lastYear = project(2023, {}, [checkpoint('2023-06-01', 0, 0, 5)]);
+    expect(lastYear.months[11].rtt).toBeCloseTo(5 + 7 * RTT_2023_PER_MONTH, 3);
+    const { months } = project(2024, {}, [checkpoint('2023-06-01', 0, 0, 5)]);
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH, 3);
+  });
+
+  test('RTT taken ahead of accrual goes negative until the months cover it', () => {
+    const { months } = project(2024, { '2024-01-02': RTT, '2024-01-03': RTT });
+    expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH - 2, 3);
+    expect(months[1].rtt).toBeCloseTo(2 * RTT_2024_PER_MONTH - 2, 3);
+    expect(months[11].rtt).toBeCloseTo(19 - 2, 3);
   });
 
   test('an RTT day uses one RTT', () => {
-    const { months, rttLostOnDec31 } = project(2024, { '2024-01-02': RTT });
+    const { months } = project(2024, { '2024-01-02': RTT });
     expect(months[0].rtt).toBeCloseTo(RTT_2024_PER_MONTH - 1, 3);
-    expect(rttLostOnDec31).toBeCloseTo(19 - 1, 3);
+    expect(months[11].rtt).toBeCloseTo(19 - 1, 3);
   });
 
   test('leave on weekends is ignored', () => {

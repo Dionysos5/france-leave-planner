@@ -119,6 +119,5 @@ export const projectYear = (
   return {
     months,
     cpLostOnMay31: round3(cpLostOnMay31),
-    rttLostOnDec31: round3(Math.max(0, pools.rtt)),
   };
 };

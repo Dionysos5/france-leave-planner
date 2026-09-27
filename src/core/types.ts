@@ -54,6 +54,4 @@ export interface YearProjection {
   months: MonthBalance[];
   /** CP N-1 still untaken at the end of May 31, forfeited on June 1. */
   cpLostOnMay31: number;
-  /** RTT still untaken at the end of December 31, forfeited on January 1. */
-  rttLostOnDec31: number;
 }
