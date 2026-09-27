@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS, DEFAULT_UI_PREFS, STORAGE_KEY, STORAGE_VERSION } from '@constants';
-import { type BalanceCheckpoint, type LeaveSettings, LeaveType, type Plan } from '@core';
+import { type BalanceCheckpoint, DayType, type LeaveSettings, type Plan } from '@core';
 import type { UIPreferences } from '@shared/types';
 
 export interface PersistedState {
@@ -37,13 +37,13 @@ const safeLocalStorage = (): Pick<Storage, 'getItem' | 'setItem'> => {
   }
 };
 
-const VALID_TYPES: ReadonlySet<string> = new Set(Object.values(LeaveType));
+const VALID_TYPES: ReadonlySet<string> = new Set(Object.values(DayType));
 
 const isDateStr = (value: unknown): value is string => {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 };
 
-const isLeaveType = (value: unknown): value is LeaveType => {
+const isDayType = (value: unknown): value is DayType => {
   return typeof value === 'string' && VALID_TYPES.has(value);
 };
 
@@ -57,7 +57,7 @@ const sanitizePlan = (value: unknown): Plan => {
   }
   const plan: Plan = {};
   for (const [dateStr, type] of Object.entries(value)) {
-    if (isDateStr(dateStr) && isLeaveType(type)) {
+    if (isDateStr(dateStr) && isDayType(type)) {
       plan[dateStr] = type;
     }
   }
@@ -172,7 +172,7 @@ const planFromV1Leaves = (leaves: unknown): Plan => {
       continue;
     }
     const { dateStr, type } = entry as { dateStr?: unknown; type?: unknown };
-    if (isDateStr(dateStr) && isLeaveType(type)) {
+    if (isDateStr(dateStr) && isDayType(type)) {
       plan[dateStr] = type;
     }
   }

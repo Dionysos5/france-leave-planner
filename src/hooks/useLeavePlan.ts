@@ -1,8 +1,8 @@
 import {
   applyRange,
   applyToggle,
+  type DayType,
   type LeaveSettings,
-  type LeaveType,
   type Plan,
   projectYear,
   type YearCalendar,
@@ -13,7 +13,7 @@ import { createRepository } from '../repository';
 
 const repository = createRepository();
 
-export const useLeavePlan = (calendar: YearCalendar, activeTool: LeaveType | null) => {
+export const useLeavePlan = (calendar: YearCalendar, activeTool: DayType | null) => {
   const [persisted] = useState(repository.load);
 
   const [plan, setPlan] = useState<Plan>(persisted.plan);

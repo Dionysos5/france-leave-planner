@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test';
 import { projectYear } from './balances';
 import { buildYearCalendar } from './calendar';
 import { CP_PER_MONTH } from './rules';
-import { type BalanceCheckpoint, LeaveType, type Plan } from './types';
+import { type BalanceCheckpoint, DayType, type Plan } from './types';
 
-const { CP, RTT, UNPAID, SICK, WFH } = LeaveType;
+const { CP, RTT, UNPAID, SICK, WFH } = DayType;
 
 // Without public holidays, 2024 has 262 weekdays (19 RTT) and 2023 has 260 (17 RTT).
 const NO_HOLIDAYS = (year: number) => buildYearCalendar(year, []);

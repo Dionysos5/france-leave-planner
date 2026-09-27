@@ -1,6 +1,6 @@
 import { Tooltip } from '@components/ui/Tooltip';
-import { LEAVE_TYPES } from '@constants';
-import type { LeaveType, Plan } from '@core';
+import { DAY_TYPES } from '@constants';
+import type { DayType, Plan } from '@core';
 import { formatDate, getDayInfo, getMonthDays, isToday, type YearCalendar } from '@core';
 import { useTranslation } from '@i18n/LocaleContext';
 import type { PointerEvent } from 'react';
@@ -9,7 +9,7 @@ interface MonthGridProps {
   calendar: YearCalendar;
   month: number;
   plan: Plan;
-  activeTool: LeaveType | null;
+  activeTool: DayType | null;
   selection: ReadonlySet<string>;
   onDayPress: (dateStr: string, event: PointerEvent) => void;
 }
@@ -49,12 +49,12 @@ const MonthGrid = ({
     const info = getDayInfo(calendar, dateStr);
     const isWknd = info.kind === 'weekend';
     const holiday = info.holiday;
-    const leaveType = plan[dateStr];
+    const dayType = plan[dateStr];
     const today = isToday(dateStr);
 
     const previewing = selection.has(dateStr) && !isWknd && !holiday;
-    const shownType = previewing ? activeTool : leaveType;
-    const swatch = shownType ? LEAVE_TYPES[shownType].swatch : null;
+    const shownType = previewing ? activeTool : dayType;
+    const swatch = shownType ? DAY_TYPES[shownType].swatch : null;
     const DayIcon = swatch && 'icon' in swatch ? swatch.icon : null;
 
     let bgClass = 'bg-white hover:bg-slate-50';
@@ -63,8 +63,8 @@ const MonthGrid = ({
     let borderClass = 'border-slate-100';
 
     // Apply Styles
-    if (leaveType) {
-      bgClass = LEAVE_TYPES[leaveType].cellClass;
+    if (dayType) {
+      bgClass = DAY_TYPES[dayType].cellClass;
       textClass = 'font-bold';
       borderClass = '';
     } else if (holiday) {
@@ -81,7 +81,7 @@ const MonthGrid = ({
     if (previewing) {
       if (activeTool) {
         // Show active tool color
-        bgClass = LEAVE_TYPES[activeTool].cellClass;
+        bgClass = DAY_TYPES[activeTool].cellClass;
         textClass = 'font-bold';
         borderClass = '';
       } else {

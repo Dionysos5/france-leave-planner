@@ -1,8 +1,8 @@
-import { LeaveType } from '@core';
+import { DayType } from '@core';
 import type { Locale } from '@shared/types';
 import { House, type LucideIcon } from 'lucide-react';
 
-interface LeaveTypeDescriptor {
+interface DayTypeDescriptor {
   /** Number key that selects the tool (top row or numpad). */
   shortcut: string;
   label: Record<Locale, string>;
@@ -17,8 +17,8 @@ interface LeaveTypeDescriptor {
 }
 
 /** Everything the UI needs per day type; adding a type means adding one entry here. */
-export const LEAVE_TYPES: Record<LeaveType, LeaveTypeDescriptor> = {
-  [LeaveType.CP]: {
+export const DAY_TYPES: Record<DayType, DayTypeDescriptor> = {
+  [DayType.CP]: {
     shortcut: '1',
     label: { en: 'Paid Leave (CP)', fr: 'Congés Payés (CP)' },
     shortLabel: { en: 'CP', fr: 'CP' },
@@ -26,7 +26,7 @@ export const LEAVE_TYPES: Record<LeaveType, LeaveTypeDescriptor> = {
     swatch: { dotClass: 'bg-leave-cp' },
     isLeave: true,
   },
-  [LeaveType.RTT]: {
+  [DayType.RTT]: {
     shortcut: '2',
     label: { en: 'RTT', fr: 'RTT' },
     shortLabel: { en: 'RTT', fr: 'RTT' },
@@ -34,7 +34,7 @@ export const LEAVE_TYPES: Record<LeaveType, LeaveTypeDescriptor> = {
     swatch: { dotClass: 'bg-leave-rtt' },
     isLeave: true,
   },
-  [LeaveType.UNPAID]: {
+  [DayType.UNPAID]: {
     shortcut: '3',
     label: { en: 'Unpaid Leave', fr: 'Sans solde' },
     shortLabel: { en: 'Unpaid', fr: 'Sans solde' },
@@ -42,7 +42,7 @@ export const LEAVE_TYPES: Record<LeaveType, LeaveTypeDescriptor> = {
     swatch: { dotClass: 'bg-leave-unpaid' },
     isLeave: true,
   },
-  [LeaveType.SICK]: {
+  [DayType.SICK]: {
     shortcut: '4',
     label: { en: 'Sick Leave', fr: 'Arrêt maladie' },
     shortLabel: { en: 'Sick', fr: 'Maladie' },
@@ -51,7 +51,7 @@ export const LEAVE_TYPES: Record<LeaveType, LeaveTypeDescriptor> = {
     isLeave: true,
   },
   // A worked day: marked on the calendar, ignored by the balances.
-  [LeaveType.WFH]: {
+  [DayType.WFH]: {
     shortcut: '6',
     label: { en: 'Work from home', fr: 'Télétravail' },
     cellClass: 'bg-white text-slate-700 border-dashed border-slate-400 hover:bg-slate-50',

@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 import { buildYearCalendar } from './calendar';
 import { applyRange, applyToggle, resolveSelection } from './plan';
-import { LeaveType } from './types';
+import { DayType } from './types';
 
-const { CP, RTT, UNPAID } = LeaveType;
+const { CP, RTT, UNPAID } = DayType;
 
 describe('applyToggle', () => {
   test('adds a leave on an empty day', () => {

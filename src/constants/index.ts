@@ -1,3 +1,3 @@
+export * from './dayTypes';
 export * from './defaults';
-export * from './leaveTypes';
 export * from './storage';

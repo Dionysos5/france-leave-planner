@@ -1,7 +1,7 @@
 import { getDatesInRange, isWorkableDay } from './calendar';
-import type { LeaveType, Plan, YearCalendar } from './types';
+import type { DayType, Plan, YearCalendar } from './types';
 
-export const applyToggle = (plan: Plan, dateStr: string, tool: LeaveType | null): Plan => {
+export const applyToggle = (plan: Plan, dateStr: string, tool: DayType | null): Plan => {
   const removes = tool === null || plan[dateStr] === tool;
   const next = { ...plan };
   if (removes) {
@@ -12,7 +12,7 @@ export const applyToggle = (plan: Plan, dateStr: string, tool: LeaveType | null)
   return next;
 };
 
-export const applyRange = (plan: Plan, dates: string[], tool: LeaveType | null): Plan => {
+export const applyRange = (plan: Plan, dates: string[], tool: DayType | null): Plan => {
   const next = { ...plan };
   for (const dateStr of dates) {
     if (tool === null) {

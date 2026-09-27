@@ -1,15 +1,15 @@
 export type Language = 'en' | 'fr';
 
-export const LeaveType = {
+export const DayType = {
   CP: 'CP',
   RTT: 'RTT',
   UNPAID: 'UNPAID',
   SICK: 'SICK',
   WFH: 'WFH',
 } as const;
-export type LeaveType = (typeof LeaveType)[keyof typeof LeaveType];
+export type DayType = (typeof DayType)[keyof typeof DayType];
 
-export type Plan = Record<string, LeaveType>;
+export type Plan = Record<string, DayType>;
 
 export interface PublicHoliday {
   dateStr: string;

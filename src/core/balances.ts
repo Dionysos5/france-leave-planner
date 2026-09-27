@@ -7,8 +7,8 @@ import {
   SICK_CP_ACCRUAL_RATIO,
 } from './rules';
 import {
+  DayType,
   type LeaveSettings,
-  LeaveType,
   type MonthBalance,
   type Plan,
   type YearCalendar,
@@ -90,19 +90,19 @@ export const projectYear = (
         workableDays += 1;
 
         switch (plan[dateStr]) {
-          case LeaveType.CP:
+          case DayType.CP:
             takeCP(pools);
             break;
-          case LeaveType.RTT:
+          case DayType.RTT:
             pools.rtt -= 1;
             break;
-          case LeaveType.UNPAID:
+          case DayType.UNPAID:
             unpaidDays += 1;
             break;
-          case LeaveType.SICK:
+          case DayType.SICK:
             sickDays += 1;
             break;
-          case LeaveType.WFH:
+          case DayType.WFH:
             // Working from home is a worked day: nothing to deduct, full accrual.
             break;
         }

@@ -1,7 +1,7 @@
 import { Button } from '@components/ui/Button';
 import { Kbd } from '@components/ui/Kbd';
-import { LEAVE_TYPES } from '@constants';
-import { LeaveType } from '@core';
+import { DAY_TYPES } from '@constants';
+import { DayType } from '@core';
 import { displayKeyForTool } from '@hooks/useKeyboardShortcuts';
 import { useTranslation } from '@i18n/LocaleContext';
 import type { UIPreferences } from '@shared/types';
@@ -9,12 +9,12 @@ import { Eraser } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { HidePastToggle } from './HidePastToggle';
 
-const LEAVE_TOOLS = Object.values(LeaveType).filter((type) => LEAVE_TYPES[type].isLeave);
-const OTHER_TOOLS = Object.values(LeaveType).filter((type) => !LEAVE_TYPES[type].isLeave);
+const LEAVE_TOOLS = Object.values(DayType).filter((type) => DAY_TYPES[type].isLeave);
+const OTHER_TOOLS = Object.values(DayType).filter((type) => !DAY_TYPES[type].isLeave);
 
 interface LeaveToolbarProps {
-  activeTool: LeaveType | null;
-  setActiveTool: (tool: LeaveType | null) => void;
+  activeTool: DayType | null;
+  setActiveTool: (tool: DayType | null) => void;
   uiPreferences: UIPreferences;
   setUiPreferences: (prefs: UIPreferences) => void;
 }
@@ -31,7 +31,7 @@ const LeaveToolbar = ({
 
   // Phones only have room for one label: inactive tools show just their swatch.
   const toolButton = (
-    tool: LeaveType | null,
+    tool: DayType | null,
     swatch: ReactNode,
     label: string,
     phoneLabel: string
@@ -56,8 +56,8 @@ const LeaveToolbar = ({
     );
   };
 
-  const dayTypeButton = (type: LeaveType) => {
-    const { swatch, label, shortLabel } = LEAVE_TYPES[type];
+  const dayTypeButton = (type: DayType) => {
+    const { swatch, label, shortLabel } = DAY_TYPES[type];
     return toolButton(
       type,
       'icon' in swatch ? (
