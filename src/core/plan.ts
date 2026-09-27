@@ -1,4 +1,5 @@
-import type { LeaveType, Plan } from './types';
+import { getDatesInRange, isWorkableDay } from './calendar';
+import type { LeaveType, Plan, YearCalendar } from './types';
 
 export const applyToggle = (plan: Plan, dateStr: string, tool: LeaveType | null): Plan => {
   const removes = tool === null || plan[dateStr] === tool;
@@ -21,4 +22,28 @@ export const applyRange = (plan: Plan, dates: string[], tool: LeaveType | null):
     }
   }
   return next;
+};
+
+export type SelectionEdit =
+  | { kind: 'toggle'; dateStr: string }
+  | { kind: 'range'; dates: string[] }
+  | null;
+
+/**
+ * What releasing a drag from `anchor` to `hover` does: a click on one workable day toggles
+ * it, a drag paints every workable day in between (across months), otherwise nothing.
+ */
+export const resolveSelection = (
+  calendar: YearCalendar,
+  anchor: string,
+  hover: string
+): SelectionEdit => {
+  const dates = getDatesInRange(anchor, hover).filter((d) => isWorkableDay(calendar, d));
+  if (dates.length === 0) {
+    return null;
+  }
+  if (anchor === hover) {
+    return { kind: 'toggle', dateStr: anchor };
+  }
+  return { kind: 'range', dates };
 };

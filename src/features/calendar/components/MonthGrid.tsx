@@ -1,26 +1,18 @@
 import { Tooltip } from '@components/ui/Tooltip';
 import { LEAVE_COLORS } from '@constants';
 import type { LeaveType, Plan } from '@core';
-import {
-  formatDate,
-  getDatesInRange,
-  getDayInfo,
-  getMonthDays,
-  isToday,
-  isWorkableDay,
-  type YearCalendar,
-} from '@core';
+import { formatDate, getDayInfo, getMonthDays, isToday, type YearCalendar } from '@core';
 import { useTranslation } from '@i18n/LocaleContext';
 import type { MouseEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
 
 interface MonthGridProps {
   calendar: YearCalendar;
   month: number;
   plan: Plan;
   activeTool: LeaveType | null;
-  onToggleDay: (dateStr: string) => void;
-  onRangeUpdate: (dates: string[]) => void;
+  selection: ReadonlySet<string>;
+  onSelectionStart: (dateStr: string) => void;
+  onSelectionExtend: (dateStr: string) => void;
 }
 
 const MonthGrid = ({
@@ -28,8 +20,9 @@ const MonthGrid = ({
   month,
   plan,
   activeTool,
-  onToggleDay,
-  onRangeUpdate,
+  selection,
+  onSelectionStart,
+  onSelectionExtend,
 }: MonthGridProps) => {
   const { locale, translations } = useTranslation();
   const monthDays = getMonthDays(calendar, month);
@@ -45,59 +38,6 @@ const MonthGrid = ({
     }
   );
   const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-
-  // Drag State
-  const [selectionStart, setSelectionStart] = useState<string | null>(null);
-  const [currentHover, setCurrentHover] = useState<string | null>(null);
-
-  const isDragging = selectionStart !== null;
-
-  // Calculate visual selection range
-  const selectionRange = useMemo(() => {
-    if (!selectionStart || !currentHover) return new Set<string>();
-    return new Set(getDatesInRange(selectionStart, currentHover));
-  }, [selectionStart, currentHover]);
-
-  // Handle Drag End (Global mouse up to catch releases outside the grid)
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      if (isDragging && selectionStart && currentHover) {
-        // Commit the selection
-        const dates = getDatesInRange(selectionStart, currentHover);
-        // Filter out invalid days (weekends/holidays) so we don't paint them
-        const validDates = dates.filter((d) => isWorkableDay(calendar, d));
-
-        if (validDates.length > 0) {
-          if (validDates.length === 1 && selectionStart === currentHover) {
-            // Single click behavior (Toggle)
-            onToggleDay(validDates[0]);
-          } else {
-            // Drag behavior (Paint/Overwrite)
-            onRangeUpdate(validDates);
-          }
-        }
-      }
-      // Reset state
-      setSelectionStart(null);
-      setCurrentHover(null);
-    };
-
-    const cancelDrag = () => {
-      setSelectionStart(null);
-      setCurrentHover(null);
-    };
-
-    if (isDragging) {
-      window.addEventListener('mouseup', handleGlobalMouseUp);
-      document.addEventListener('mouseleave', cancelDrag);
-      window.addEventListener('blur', cancelDrag);
-    }
-    return () => {
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-      document.removeEventListener('mouseleave', cancelDrag);
-      window.removeEventListener('blur', cancelDrag);
-    };
-  }, [isDragging, selectionStart, currentHover, onToggleDay, onRangeUpdate, calendar]);
 
   const days = [];
 
@@ -135,7 +75,7 @@ const MonthGrid = ({
     }
 
     // Apply Drag Preview Overrides
-    if (selectionRange.has(dateStr) && !isWknd && !holiday) {
+    if (selection.has(dateStr) && !isWknd && !holiday) {
       if (activeTool) {
         // Show active tool color
         bgClass = LEAVE_COLORS[activeTool];
@@ -153,21 +93,14 @@ const MonthGrid = ({
       if (holiday || isWknd) return;
 
       e.preventDefault(); // Prevent text selection
-      setSelectionStart(dateStr);
-      setCurrentHover(dateStr);
-    };
-
-    const handleMouseEnter = () => {
-      if (isDragging) {
-        setCurrentHover(dateStr);
-      }
+      onSelectionStart(dateStr);
     };
 
     const cell = (
       <div
         key={d}
         onMouseDown={handleMouseDown}
-        onMouseEnter={handleMouseEnter}
+        onMouseEnter={() => onSelectionExtend(dateStr)}
         className={`
           day-cell flex flex-col items-center justify-center text-xs border rounded-sm transition-all duration-75 relative select-none
           ${bgClass} ${textClass} ${cursorClass} ${borderClass}

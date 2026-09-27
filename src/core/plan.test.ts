@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { applyRange, applyToggle } from './plan';
+import { buildYearCalendar } from './calendar';
+import { applyRange, applyToggle, resolveSelection } from './plan';
 import { LeaveType } from './types';
 
 const { CP, RTT, UNPAID } = LeaveType;
@@ -52,5 +53,36 @@ describe('applyRange', () => {
   test('the eraser clears exactly the given dates', () => {
     const plan = { '2026-08-03': CP, '2026-08-04': RTT, '2026-08-05': CP };
     expect(applyRange(plan, [dates[0], dates[2]], null)).toEqual({ '2026-08-04': RTT });
+  });
+});
+
+describe('resolveSelection', () => {
+  const calendar = buildYearCalendar(2026, [
+    { dateStr: '2026-10-01', name: { en: 'Test holiday', fr: 'Férié de test' } },
+  ]);
+
+  test('a click on a workable day toggles it', () => {
+    expect(resolveSelection(calendar, '2026-09-28', '2026-09-28')).toEqual({
+      kind: 'toggle',
+      dateStr: '2026-09-28',
+    });
+  });
+
+  test('a drag across months paints every workable day in between', () => {
+    expect(resolveSelection(calendar, '2026-09-28', '2026-10-05')).toEqual({
+      kind: 'range',
+      dates: ['2026-09-28', '2026-09-29', '2026-09-30', '2026-10-02', '2026-10-05'],
+    });
+  });
+
+  test('dragging backwards gives the same range', () => {
+    expect(resolveSelection(calendar, '2026-09-30', '2026-09-28')).toEqual({
+      kind: 'range',
+      dates: ['2026-09-28', '2026-09-29', '2026-09-30'],
+    });
+  });
+
+  test('a drag over weekends only does nothing', () => {
+    expect(resolveSelection(calendar, '2026-10-03', '2026-10-04')).toBeNull();
   });
 });

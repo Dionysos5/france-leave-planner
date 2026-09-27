@@ -5,6 +5,7 @@ import MonthGrid from '@features/calendar/components/MonthGrid';
 import SettingsPanel from '@features/settings/components/SettingsPanel';
 import { useEditorState } from '@hooks/useEditorState';
 import { useLeavePlan } from '@hooks/useLeavePlan';
+import { usePaintSelection } from '@hooks/usePaintSelection';
 import { useTranslation } from '@i18n/LocaleContext';
 import {
   ChevronLeft,
@@ -52,6 +53,11 @@ function App() {
     handleToggleDay,
     handleRangeUpdate,
   } = useLeavePlan(calendar, activeTool);
+  const { selection, startSelection, extendSelection } = usePaintSelection(
+    calendar,
+    handleToggleDay,
+    handleRangeUpdate
+  );
 
   const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-GB';
   const endBalance = projection.months[11];
@@ -157,8 +163,9 @@ function App() {
                 month={i}
                 plan={plan}
                 activeTool={activeTool}
-                onToggleDay={handleToggleDay}
-                onRangeUpdate={handleRangeUpdate}
+                selection={selection}
+                onSelectionStart={startSelection}
+                onSelectionExtend={extendSelection}
               />
             ))}
         </div>
